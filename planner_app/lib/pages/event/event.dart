@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:planner_app/pages/custom_bottom_drawer.dart';
 import 'package:planner_app/pages/event/past.dart';
 import 'package:planner_app/pages/event/future.dart';
 import 'package:planner_app/pages/todo/todo.dart';
@@ -20,22 +21,25 @@ class _EventState extends State<Event> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        title: Text('Event', style: Theme.of(context).textTheme.titleMedium),
+        title: Text('Event'),
         actions: [
           IconButton(
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => Todo()),
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) =>
+                        Todo(),
+                    transitionsBuilder:
+                        (context, animation, secondaryAnimation, child) {
+                      return child; // No transition
+                    },
+                  ),
                 );
               },
               icon: Icon(
                 Icons.toc,
-                size: 30,
-                color: Theme.of(context).colorScheme.surface,
               )),
           SizedBox(
             width: 10,
@@ -44,11 +48,11 @@ class _EventState extends State<Event> {
               onPressed: () {},
               icon: Icon(
                 Icons.add,
-                size: 30,
-                color: Theme.of(context).colorScheme.surface,
               ))
         ],
       ),
+      drawer: CustomBottomDrawer(),
+
       body: _pages[_selectedIndexBottomNav],
       // floatingActionButton: FloatingActionButton(onPressed: () {}),
       bottomNavigationBar: BottomNavigationBar(

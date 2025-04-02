@@ -42,61 +42,59 @@ class _TodayState extends State<Today> {
         children: [
           // Iterate over time labels and their corresponding tasks
           for (int i = 0; i < timePeriod.length; i++) ...[
-            Container(
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.zero,
-                  color: const Color.fromARGB(99, 148, 148, 148)),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(timeLabels[i],
-                          style: Theme.of(context).textTheme.headlineSmall),
-                      Text("4:30AM",
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineSmall) // Placeholder for actual time if needed
-                    ],
-                  ),
-                  Divider(),
-                  // ReorderableListView for each time period to allow reordering of tasks
-                  ReorderableListView(
-                    physics: NeverScrollableScrollPhysics(),
-                    shrinkWrap: true, // Prevent infinite height
-                    onReorder: (oldIndex, newIndex) {
-                      setState(() {
-                        if (newIndex > oldIndex) {
-                          newIndex -= 1;
-                        }
-                        final Task item = timePeriod[i].removeAt(oldIndex);
-                        timePeriod[i].insert(newIndex, item);
-                      });
-                    },
-                    children: [
-                      for (int j = 0; j < timePeriod[i].length; j++)
-                        ListTile(
-                          dense: true,
-                          contentPadding: EdgeInsets.zero,
+            // Divider(),
 
-                          key: ValueKey(timePeriod[i][j]
-                              .title), // Unique key for each list item
-                          leading: Checkbox(
-                            value: value,
-                            onChanged: (bool? newValue) {
-                              setState(() {
-                                value = newValue;
-                              });
-                            },
-                          ),
-                          title: Text(timePeriod[i][j].title),
-                          trailing: Text(timePeriod[i][j].duration),
-                        ),
-                    ],
-                  ),
+            Container(
+              color: i == 1
+                  ? Theme.of(context).colorScheme.secondary
+                  : Color.fromARGB(30, 65, 100, 74),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(timeLabels[i],
+                      style: Theme.of(context).textTheme.titleMedium),
+                  Text("4:30AM",
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium) // Placeholder for actual time if needed
                 ],
               ),
-            )
+            ),
+            // Divider(),
+            // ReorderableListView for each time period to allow reordering of tasks
+            ReorderableListView(
+              physics: NeverScrollableScrollPhysics(),
+              shrinkWrap: true, // Prevent infinite height
+              onReorder: (oldIndex, newIndex) {
+                setState(() {
+                  if (newIndex > oldIndex) {
+                    newIndex -= 1;
+                  }
+                  final Task item = timePeriod[i].removeAt(oldIndex);
+                  timePeriod[i].insert(newIndex, item);
+                });
+              },
+              children: [
+                for (int j = 0; j < timePeriod[i].length; j++)
+                  ListTile(
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+
+                    key: ValueKey(timePeriod[i][j]
+                        .title), // Unique key for each list item
+                    leading: Checkbox(
+                      value: value,
+                      onChanged: (bool? newValue) {
+                        setState(() {
+                          value = newValue;
+                        });
+                      },
+                    ),
+                    title: Text(timePeriod[i][j].title),
+                    trailing: Text(timePeriod[i][j].duration),
+                  ),
+              ],
+            ),
           ],
         ],
       ),

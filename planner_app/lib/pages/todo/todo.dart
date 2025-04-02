@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:planner_app/pages/custom_bottom_drawer.dart';
 import 'package:planner_app/pages/event/event.dart';
+import 'package:planner_app/pages/todo/add_todo.dart';
 import 'package:planner_app/pages/todo/today.dart';
 import 'package:planner_app/pages/todo/tommorow.dart';
-import 'package:planner_app/task_model.dart';
 
 class Todo extends StatefulWidget {
   const Todo({super.key});
@@ -19,35 +20,35 @@ class _TodoState extends State<Todo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        title: Text('Todo', style: Theme.of(context).textTheme.titleMedium),
+        title: Text(
+          'Todo',
+        ),
         actions: [
           IconButton(
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => Event()),
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) =>
+                        Event(),
+                    transitionsBuilder:
+                        (context, animation, secondaryAnimation, child) {
+                      return child; // No transition
+                    },
+                  ),
                 );
               },
               icon: Icon(
                 Icons.calendar_month,
-                size: 30,
-                color: Theme.of(context).colorScheme.surface,
               )),
           SizedBox(
             width: 10,
           ),
-          IconButton(
-              onPressed: () {},
-              icon: Icon(
-                Icons.add,
-                size: 30,
-                color: Theme.of(context).colorScheme.surface,
-              ))
+          AddTodo()
         ],
       ),
+      drawer: CustomBottomDrawer(),
       body: _pages[_selectedIndexBottomNav],
       // floatingActionButton: FloatingActionButton(
       //     onPressed: () {},
@@ -59,12 +60,14 @@ class _TodoState extends State<Todo> {
           currentIndex: _selectedIndexBottomNav,
           items: [
             BottomNavigationBarItem(
-                icon: Icon(Icons.check,
-                    size: 30, color: Theme.of(context).colorScheme.tertiary),
+                icon: Icon(
+                  Icons.check,
+                ),
                 label: 'Today'),
             BottomNavigationBarItem(
-                icon: Icon(Icons.sunny,
-                    size: 30, color: Theme.of(context).colorScheme.tertiary),
+                icon: Icon(
+                  Icons.sunny,
+                ),
                 label: 'Tomorrow'),
           ]),
     );
