@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:planner_app/task_model.dart';
+import 'package:planner_app/database/Task.dart';
+import 'package:planner_app/database/database_service.dart';
+import 'package:planner_app/pages/components/custom_top_bar.dart';
 
 class Today extends StatefulWidget {
   const Today({super.key});
@@ -9,94 +11,93 @@ class Today extends StatefulWidget {
 }
 
 class _TodayState extends State<Today> {
-  List<List<Task>> timePeriod = [
-    [
-      Task("Work on the event tracker app", "2hrs", false),
-      Task("Write project documentation", "1.5hrs", true),
-    ],
-    [
-      Task("Design new UI layout", "3hrs", false),
-      Task("Fix backend API bugs", "2hrs", true),
-    ],
-    [
-      Task("Test mobile app features", "1hr", false),
-      Task("Prepare for client meeting", "1hr", true),
-    ],
-    [
-      Task("Update dependencies in the project", "45min", false),
-      Task("Refactor authentication module", "2hrs", true),
-    ],
-    [
-      Task("Research new UI frameworks", "1.5hrs", false),
-      Task("Write unit tests for services", "2hrs", true),
-    ],
-  ];
+  final DatabaseService _databaseService = DatabaseService.instance;
+
   List<String> timeLabels = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
-  bool? value = false;
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Iterate over time labels and their corresponding tasks
-          for (int i = 0; i < timePeriod.length; i++) ...[
-            // Divider(),
-
+    return Scaffold(
+      appBar: CustomTopBar(),
+      body: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
             Container(
-              color: i == 1
+              padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              color: 1 == 1
                   ? Theme.of(context).colorScheme.secondary
                   : Color.fromARGB(30, 65, 100, 74),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(timeLabels[i],
+                  Text(timeLabels[0],
                       style: Theme.of(context).textTheme.titleMedium),
-                  Text("4:30AM",
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium) // Placeholder for actual time if needed
+                  Text("4:30 AM",
+                      style: Theme.of(context).textTheme.titleMedium),
                 ],
               ),
             ),
-            // Divider(),
-            // ReorderableListView for each time period to allow reordering of tasks
-            ReorderableListView(
-              physics: NeverScrollableScrollPhysics(),
-              shrinkWrap: true, // Prevent infinite height
-              onReorder: (oldIndex, newIndex) {
-                setState(() {
-                  if (newIndex > oldIndex) {
-                    newIndex -= 1;
-                  }
-                  final Task item = timePeriod[i].removeAt(oldIndex);
-                  timePeriod[i].insert(newIndex, item);
-                });
-              },
-              children: [
-                for (int j = 0; j < timePeriod[i].length; j++)
-                  ListTile(
-                    dense: true,
-                    contentPadding: EdgeInsets.zero,
+            FutureBuilder(
+              future: _databaseService.getTasksForTime("Fajr"),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text("Error: ${snapshot.error}"));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(child: Text("No tasks found"));
+                } else {
+                  return ReorderableListView.builder(
+                    onReorder: (int oldIndex, int newIndex) async {
+                      if (oldIndex < newIndex) {
+                        newIndex -=
+                            1; // Adjust index since the list shrinks temporarily
+                      }
 
-                    key: ValueKey(timePeriod[i][j]
-                        .title), // Unique key for each list item
-                    leading: Checkbox(
-                      value: value,
-                      onChanged: (bool? newValue) {
-                        setState(() {
-                          value = newValue;
-                        });
-                      },
-                    ),
-                    title: Text(timePeriod[i][j].title),
-                    trailing: Text(timePeriod[i][j].duration),
-                  ),
-              ],
+                      final movedTask = snapshot.data![oldIndex];
+
+                      setState(() {
+                        final updatedList = List.from(snapshot.data!);
+                        updatedList.insert(
+                            newIndex, updatedList.removeAt(oldIndex));
+                        snapshot.data!.clear();
+                        snapshot.data!.addAll(updatedList.cast<Task>());
+                      });
+
+                      await _databaseService.reorderTask(
+                        movedTask.id,
+                        oldIndex,
+                        newIndex,
+                      );
+                    },
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (context, index) {
+                      Task task = snapshot.data![index];
+
+                      return ListTile(
+                        key: ValueKey(
+                            task.id.hashCode), // Unique key for each list item
+                        leading: Checkbox(
+                          value: task.completed,
+                          onChanged: (bool? newValue) {
+                            setState(() {
+                              task.completed = newValue ?? false;
+                            });
+                          },
+                        ),
+                        title: Text(task.title),
+                        trailing: Text("${task.duration}h"),
+                      );
+                    },
+                  );
+                }
+              },
             ),
           ],
-        ],
+        ),
       ),
     );
   }
