@@ -5,7 +5,7 @@ class Task {
   double duration;
   bool completed;
   String partOfDay;
-  DateTime createdAt;
+  DateTime dueDate;
   String description;
 
   Task({
@@ -15,7 +15,7 @@ class Task {
     required this.duration,
     required this.completed,
     required this.partOfDay,
-    required this.createdAt,
+    required this.dueDate,
     required this.description,
   });
 }

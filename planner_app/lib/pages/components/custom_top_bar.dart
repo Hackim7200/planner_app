@@ -33,7 +33,6 @@ class CustomTopBar extends StatelessWidget implements PreferredSizeWidget {
         SizedBox(
           width: 10,
         ),
-        AddTodo(),
       ],
     );
   }

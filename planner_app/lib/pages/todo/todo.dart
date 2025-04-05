@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:planner_app/database/database_service.dart';
-
+import 'package:planner_app/pages/components/custom_top_bar.dart';
 
 import 'package:planner_app/pages/custom_bottom_drawer.dart';
-
+import 'package:planner_app/pages/todo/Tomorrow.dart';
 
 import 'package:planner_app/pages/todo/today.dart';
-import 'package:planner_app/pages/todo/tommorow.dart';
 
 class Todo extends StatefulWidget {
   const Todo({super.key});
@@ -25,6 +24,7 @@ class _TodoState extends State<Todo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: CustomTopBar(),
       drawer: CustomBottomDrawer(),
       body: _pages[_selectedIndexBottomNav],
       // floatingActionButton: FloatingActionButton(
