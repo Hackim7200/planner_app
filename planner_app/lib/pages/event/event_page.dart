@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:planner_app/pages/custom_bottom_drawer.dart';
-import 'package:planner_app/pages/event/past.dart';
-import 'package:planner_app/pages/event/future.dart';
-import 'package:planner_app/pages/todo/todo.dart';
+import 'package:planner_app/pages/event/add_event.dart';
+import 'package:planner_app/pages/event/past_evemts.dart';
+import 'package:planner_app/pages/event/future_events.dart';
+import 'package:planner_app/pages/todo/todo_page.dart';
 
-class Event extends StatefulWidget {
-  const Event({
+class EventPage extends StatefulWidget {
+  const EventPage({
     super.key,
   });
 
   @override
-  State<Event> createState() => _EventState();
+  State<EventPage> createState() => _EventPageState();
 }
 
-class _EventState extends State<Event> {
+class _EventPageState extends State<EventPage> {
   int _selectedIndexBottomNav = 0;
 
-  final List<Widget> _pages = [Future(), Past()];
+  final List<Widget> _pages = [FutureEvents(), PastEvents()];
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +31,7 @@ class _EventState extends State<Event> {
                   context,
                   PageRouteBuilder(
                     pageBuilder: (context, animation, secondaryAnimation) =>
-                        Todo(),
+                        TodoPage(),
                     transitionsBuilder:
                         (context, animation, secondaryAnimation, child) {
                       return child; // No transition
@@ -44,11 +45,9 @@ class _EventState extends State<Event> {
           SizedBox(
             width: 10,
           ),
-          IconButton(
-              onPressed: () {},
-              icon: Icon(
-                Icons.add,
-              ))
+          AddEvent(onAddEvent: () {
+            setState(() {});
+          }),
         ],
       ),
       drawer: CustomBottomDrawer(),

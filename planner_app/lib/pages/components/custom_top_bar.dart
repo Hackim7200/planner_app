@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:planner_app/pages/event/event.dart';
+import 'package:planner_app/pages/event/event_page.dart';
 import 'package:planner_app/pages/todo/add_todo.dart';
 
 class CustomTopBar extends StatelessWidget implements PreferredSizeWidget {
@@ -18,7 +18,7 @@ class CustomTopBar extends StatelessWidget implements PreferredSizeWidget {
               context,
               PageRouteBuilder(
                 pageBuilder: (context, animation, secondaryAnimation) =>
-                    Event(),
+                    EventPage(),
                 transitionsBuilder:
                     (context, animation, secondaryAnimation, child) {
                   return child; // No transition

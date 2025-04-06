@@ -7,14 +7,14 @@ import 'package:planner_app/pages/todo/Tomorrow.dart';
 
 import 'package:planner_app/pages/todo/today.dart';
 
-class Todo extends StatefulWidget {
-  const Todo({super.key});
+class TodoPage extends StatefulWidget {
+  const TodoPage({super.key});
 
   @override
-  State<Todo> createState() => _TodoState();
+  State<TodoPage> createState() => _TodoPageState();
 }
 
-class _TodoState extends State<Todo> {
+class _TodoPageState extends State<TodoPage> {
   final DatabaseService _databaseService = DatabaseService.instance;
 
   int _selectedIndexBottomNav = 0;
