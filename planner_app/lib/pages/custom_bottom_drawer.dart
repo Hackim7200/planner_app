@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:planner_app/pages/bucket_list.dart';
-import 'package:planner_app/pages/habits.dart';
+import 'package:planner_app/pages/habits/habits.dart';
 import 'package:planner_app/pages/how_to.dart';
 
 class CustomBottomDrawer extends StatelessWidget {

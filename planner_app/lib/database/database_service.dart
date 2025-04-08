@@ -29,11 +29,14 @@ class DatabaseService {
   final String _habitTypeColumnName = "type";
   final String _habitDurationColumnName = "duration";
 
+  final String _eventTableName = "Events";
   final String _eventIdColumnName = "id";
   final String _eventTitleColumnName = "title";
   final String _eventDueDateColumnName = "event_due_date";
   final String _eventDescriptionColumnName = "description";
-  final String _eventColorColumnName = "color";
+  final String _eventBackgroundColorColumnName = "background_color";
+  final String _eventFontColorColumnName = "font_color";
+
   final String _eventIconColumnName = "icon_path";
 
   DatabaseService._internal();
@@ -84,12 +87,13 @@ class DatabaseService {
           """);
 
           db.execute("""
-  CREATE TABLE Events (
+  CREATE TABLE $_eventTableName (
     $_eventIdColumnName INTEGER PRIMARY KEY AUTOINCREMENT,
     $_eventTitleColumnName TEXT NOT NULL,
     $_eventDueDateColumnName TEXT NOT NULL,
     $_eventDescriptionColumnName TEXT NOT NULL,
-    $_eventColorColumnName TEXT NOT NULL,
+    $_eventBackgroundColorColumnName TEXT NOT NULL,
+    $_eventFontColorColumnName TEXT NOT NULL,
     $_eventIconColumnName TEXT NOT NULL
   );
 """);
@@ -321,7 +325,8 @@ class DatabaseService {
     required String title,
     required DateTime dueDate,
     required String description,
-    required String color,
+    required String backgroundColor,
+    required String fontColor,
     required String iconPath,
   }) async {
     try {
@@ -333,7 +338,8 @@ class DatabaseService {
           _eventTitleColumnName: title,
           _eventDueDateColumnName: dueDate.toIso8601String(),
           _eventDescriptionColumnName: description,
-          _eventColorColumnName: color,
+          _eventBackgroundColorColumnName: backgroundColor,
+          _eventFontColorColumnName: fontColor,
           _eventIconColumnName: iconPath,
         },
       );
@@ -386,7 +392,8 @@ class DatabaseService {
           title: event[_eventTitleColumnName] as String,
           dueDate: DateTime.parse(event[_eventDueDateColumnName] as String),
           description: event[_eventDescriptionColumnName] as String,
-          color: event[_eventColorColumnName] as String,
+          backgroundColor: event[_eventBackgroundColorColumnName] as String,
+          fontColor: event[_eventFontColorColumnName] as String,
           iconPath: event[_eventIconColumnName] as String,
         );
       }).toList();

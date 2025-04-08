@@ -23,7 +23,7 @@ class _FutureEventsState extends State<FutureEvents> {
 
   Future<void> _loadEvents() async {
     try {
-      final events = await _databaseService.getAllEvents(isFuture: false);
+      final events = await _databaseService.getAllEvents(isFuture: true);
       setState(() {
         _events = events;
         _isLoading = false;
@@ -72,7 +72,7 @@ class _FutureEventsState extends State<FutureEvents> {
         final daysUntil = event.dueDate.difference(DateTime.now()).inDays;
 
         return Container(
-          color: hexToColor(event.color),
+          color: hexToColor(event.backgroundColor),
           child: ListTile(
             key: ValueKey(event.id),
             leading: const Icon(Icons.event, size: 30),

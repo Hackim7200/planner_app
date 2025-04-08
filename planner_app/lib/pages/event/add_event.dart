@@ -61,7 +61,8 @@ class _AddEventState extends State<AddEvent> {
       title: titleController.text,
       dueDate: selectedDate,
       description: descriptionController.text,
-      color: selectedColorHex ?? "#000000", // fallback
+      backgroundColor: selectedColorHex ?? "#000000", // fallback
+      fontColor: "#FFFFFF", // default font color
       iconPath: "null",
     );
 

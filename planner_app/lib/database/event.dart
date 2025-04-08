@@ -3,7 +3,7 @@ class Event {
   final String title;
   final DateTime dueDate;
   final String description;
-  final String color;
+  final String backgroundColor, fontColor;
   final String iconPath;
 
   Event({
@@ -11,7 +11,8 @@ class Event {
     required this.title,
     required this.dueDate,
     required this.description,
-    required this.color,
+    required this.backgroundColor,
+    required this.fontColor,
     required this.iconPath,
   });
 
@@ -21,7 +22,8 @@ class Event {
       title: map['title'] as String,
       dueDate: DateTime.parse(map['event_due_date'] as String),
       description: map['description'] as String,
-      color: map['color'] as String,
+      backgroundColor: map['background_color'] as String,
+      fontColor: map['font_color'] as String,
       iconPath: map['icon_path'] as String,
     );
   }
@@ -32,13 +34,14 @@ class Event {
       'title': title,
       'event_due_date': dueDate.toIso8601String(),
       'description': description,
-      'color': color,
+      'background_color': backgroundColor,
+      'font_color': fontColor,
       'icon_path': iconPath,
     };
   }
 
   @override
   String toString() {
-    return 'Event(id: $id, title: $title, dueDate: $dueDate, description: $description, color: $color, iconPath: $iconPath)';
+    return 'Event(id: $id, title: $title, dueDate: $dueDate, description: $description, color: $backgroundColor, iconPath: $iconPath)';
   }
 }
