@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:planner_app/pages/bucket_list.dart';
-import 'package:planner_app/pages/habits/habits.dart';
+import 'package:planner_app/pages/habits/habit_page.dart';
+
 import 'package:planner_app/pages/how_to.dart';
 
-class CustomBottomDrawer extends StatelessWidget {
-  const CustomBottomDrawer({super.key});
+class SideMenu extends StatelessWidget {
+  const SideMenu({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -58,12 +59,12 @@ class CustomBottomDrawer extends StatelessWidget {
           ),
           ListTile(
             leading: Icon(Icons.speed),
-            title: const Text('Habbits i want to build'),
+            title: const Text('Habbits'),
             onTap: () {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => Habits(),
+                    builder: (context) => HabitPage(),
                   ));
               // Update the state of the app.
               // ...

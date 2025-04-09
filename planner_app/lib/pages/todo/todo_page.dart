@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:planner_app/database/database_service.dart';
 import 'package:planner_app/pages/components/custom_top_bar.dart';
 
-import 'package:planner_app/pages/custom_bottom_drawer.dart';
+import 'package:planner_app/pages/side_menu.dart';
 import 'package:planner_app/pages/todo/Tomorrow.dart';
 
 import 'package:planner_app/pages/todo/today.dart';
@@ -25,7 +25,7 @@ class _TodoPageState extends State<TodoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomTopBar(),
-      drawer: CustomBottomDrawer(),
+      drawer: SideMenu(),
       body: _pages[_selectedIndexBottomNav],
       // floatingActionButton: FloatingActionButton(
       //     onPressed: () {},

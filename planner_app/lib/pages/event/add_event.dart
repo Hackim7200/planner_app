@@ -146,7 +146,7 @@ class _AddEventState extends State<AddEvent> {
                       const SizedBox(height: 10),
                       Row(
                         children: [
-                          const Text("Date: "),
+                          const Text("Date: "), 
                           TextButton(
                             onPressed: _pickDate,
                             child: Text(

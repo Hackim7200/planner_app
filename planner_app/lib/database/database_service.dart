@@ -163,30 +163,30 @@ class DatabaseService {
     }
   }
 
-  Future<List<Habit>> getAllHabits() async {
-    try {
-      final db = await database;
-      final data = await db.query(_habitsTableName);
+  // Future<List<Habit>> getAllHabits() async {
+  //   try {
+  //     final db = await database;
+  //     final data = await db.query(_habitsTableName);
 
-      List<Habit> habits = data.map((habit) {
-        return Habit(
-          id: habit[_habitIdColumnName] as int,
-          title: habit[_habitTitleColumnName] as String,
-          type: habit[_habitTypeColumnName] as String,
-          duration: (habit[_habitDurationColumnName] as num).toDouble(),
-          partOfDay: habit[_habitPartOfDayColumnName] as String,
-          description: habit[_habitDescriptionColumnName] as String,
-          whichDays:
-              (habit[_habitWhichDaysColumnName] as String?)?.split(", ") ?? [],
-        );
-      }).toList();
+  //     List<Habit> habits = data.map((habit) {
+  //       return Habit(
+  //         id: habit[_habitIdColumnName] as int,
+  //         title: habit[_habitTitleColumnName] as String,
+  //         type: habit[_habitTypeColumnName] as String,
+  //         duration: (habit[_habitDurationColumnName] as num).toDouble(),
+  //         partOfDay: habit[_habitPartOfDayColumnName] as String,
+  //         description: habit[_habitDescriptionColumnName] as String,
+  //         whichDays:
+  //             (habit[_habitWhichDaysColumnName] as String?)?.split(", ") ?? [],
+  //       );
+  //     }).toList();
 
-      print("Habits retrieved (${habits.length}): $habits");
-      return habits;
-    } catch (e) {
-      throw Exception("Error retrieving Habit: $e");
-    }
-  }
+  //     print("Habits retrieved (${habits.length}): $habits");
+  //     return habits;
+  //   } catch (e) {
+  //     throw Exception("Error retrieving Habit: $e");
+  //   }
+  // }
 
   Future<void> deleteHabit(int id) async {
     try {
