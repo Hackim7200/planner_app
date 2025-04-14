@@ -7,7 +7,7 @@ class Habit {
   final String habitTitle;
   final List<String> habitEffects;
 
-  final String partOfDay;
+  final String partOfDay, habitType;
   final int priority;
 
   Habit({
@@ -18,6 +18,7 @@ class Habit {
     required this.habitTitle,
     required this.habitEffects,
     required this.partOfDay,
+    required this.habitType,
   });
 
   @override

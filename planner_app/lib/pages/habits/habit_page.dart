@@ -58,6 +58,7 @@ class HabitPage extends StatelessWidget {
                                         isGood: false,
                                         title: habit.addictionTitle,
                                         effects: habit.addictionEffects,
+                                        partOfDay: habit.partOfDay,
                                       ),
                                     ),
                                   );
@@ -95,9 +96,11 @@ class HabitPage extends StatelessWidget {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => HabitInfo(
-                                          isGood: true,
-                                          title: habit.habitTitle,
-                                          effects: habit.habitEffects),
+                                        isGood: true,
+                                        title: habit.habitTitle,
+                                        effects: habit.habitEffects,
+                                        partOfDay: habit.partOfDay,
+                                      ),
                                     ),
                                   );
                                 },

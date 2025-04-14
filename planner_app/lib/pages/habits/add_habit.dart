@@ -32,6 +32,8 @@ class _AddHabitState extends State<AddHabit> {
   final TextEditingController habitTitleController = TextEditingController();
   final TextEditingController habitEffectsController = TextEditingController();
 
+  String? _selectedHabitType; // Holds selected habit type
+
   @override
   void dispose() {
     addictionTitleController.dispose();
@@ -62,14 +64,8 @@ class _AddHabitState extends State<AddHabit> {
       final String habitTitle = habitTitleController.text.trim();
       final String habitEffects = habitEffectsController.text;
 
-      await _databaseService.addHabit(
-        priority,
-        partOfDay,
-        addictionTitle,
-        addictionEffects,
-        habitTitle,
-        habitEffects,
-      );
+      await _databaseService.addHabit(priority, partOfDay, addictionTitle,
+          addictionEffects, habitTitle, habitEffects, _selectedHabitType!);
 
       widget.onAddHabit();
       if (mounted) {
@@ -80,6 +76,7 @@ class _AddHabitState extends State<AddHabit> {
         habitEffectsController.clear();
         setState(() {
           _sliderPriority = 1;
+          _selectedHabitType = null;
         });
       }
     } catch (e) {
@@ -97,6 +94,18 @@ class _AddHabitState extends State<AddHabit> {
         // Local state variables for the dialog.
         int localSliderPriority = _sliderPriority;
         final List<String> parts = ["Fajr", "Duhr", "Asr", "Meghreb", "Isha"];
+        final List<String> habitType = [
+          "Psychological",
+          "Behavioral",
+          "Reflex",
+          "Emotional",
+          "Cognitive",
+          "Social",
+          "Physical",
+          "Addictive",
+          "Spiritual",
+        ];
+
         List<bool> selectedPartsList = List.filled(parts.length, false);
 
         showDialog(
@@ -171,6 +180,30 @@ class _AddHabitState extends State<AddHabit> {
                             ],
                           ),
                           const SizedBox(height: 10),
+
+                          // Habit Type Dropdown
+                          DropdownButtonFormField<String>(
+                            value: _selectedHabitType,
+                            decoration: const InputDecoration(
+                              labelText: 'Habit Type',
+                            ),
+                            items: habitType.map((String type) {
+                              return DropdownMenuItem<String>(
+                                value: type,
+                                child: Text(type),
+                              );
+                            }).toList(),
+                            onChanged: (String? newValue) {
+                              setStateDialog(() {
+                                _selectedHabitType = newValue;
+                              });
+                            },
+                            validator: (value) => value == null
+                                ? 'Please select a habit type'
+                                : null,
+                          ),
+                          const SizedBox(height: 10),
+
                           // Addiction Title input field
                           TextFormField(
                             controller: addictionTitleController,
@@ -184,7 +217,7 @@ class _AddHabitState extends State<AddHabit> {
                               return null;
                             },
                           ),
-                          // Addiction Effects input field
+                          const SizedBox(height: 10),
 
                           // Habit Title input field
                           TextFormField(
@@ -199,7 +232,15 @@ class _AddHabitState extends State<AddHabit> {
                               return null;
                             },
                           ),
-                          // Habit Effects input field
+                          const SizedBox(height: 10),
+
+                          // Habit Effects input field (Optional)
+                          TextFormField(
+                            controller: habitEffectsController,
+                            decoration: const InputDecoration(
+                              labelText: 'Habit Effects',
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -211,11 +252,9 @@ class _AddHabitState extends State<AddHabit> {
                   child: IconButton(
                     icon: const Icon(Icons.save),
                     onPressed: () {
-                      // Update the parent's slider priority with the dialog's value.
                       setState(() {
                         _sliderPriority = localSliderPriority;
                       });
-                      // Convert the selected toggle values to a concatenated string.
                       String partOfDayString =
                           _getSelectedPartsString(selectedPartsList, parts);
                       _submitHabit(partOfDayString);

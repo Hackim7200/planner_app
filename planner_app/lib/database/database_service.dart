@@ -23,14 +23,16 @@ class DatabaseService {
 
   final String _swapTableName = "Swap";
   final String _swapIdColumnName = "id";
+
+  final String _swapPartOfDayColumnName = "part_of_day";
+  final String _swapPriotityColumnName = "priority";
+  final String _swapHabitTypeColumnName = "habit_type";
+
   final String _swapAddictionTitleColumnName = "addiction_title";
   final String _swapAddictionEffectsColumnName = "addiction_effects";
 
   final String _swapHabitTitleColumnName = "habit_title";
   final String _swapHabitEffectsColumnName = "habit_effects";
-
-  final String _swapPartOfDayColumnName = "part_of_day";
-  final String _swapPriotityColumnName = "priority";
 
   final String _eventTableName = "Events";
   final String _eventIdColumnName = "id";
@@ -83,6 +85,11 @@ class DatabaseService {
                 CREATE TABLE $_swapTableName (
               $_swapIdColumnName INTEGER PRIMARY KEY AUTOINCREMENT,
               $_swapPriotityColumnName INTEGER NOT NULL,
+
+              $_swapHabitTypeColumnName TEXT NOT NULL,
+
+
+
               $_swapAddictionTitleColumnName TEXT NOT NULL,
               $_swapAddictionEffectsColumnName TEXT ,
 
@@ -114,13 +121,13 @@ class DatabaseService {
 
   /// Inserts a new habit (swap entry) into the Swap table.
   Future<void> addHabit(
-    int priority,
-    String partOfDay,
-    String addictionTitle,
-    String addictionEffects,
-    String habitTitle,
-    String habitEffects,
-  ) async {
+      int priority,
+      String partOfDay,
+      String addictionTitle,
+      String addictionEffects,
+      String habitTitle,
+      String habitEffects,
+      String habitType) async {
     try {
       final db = await database;
 
@@ -128,6 +135,7 @@ class DatabaseService {
         _swapTableName,
         {
           _swapPriotityColumnName: priority,
+          _swapHabitTypeColumnName: habitType,
           _swapAddictionTitleColumnName: addictionTitle,
           _swapAddictionEffectsColumnName: addictionEffects,
           _swapHabitTitleColumnName: habitTitle,
@@ -159,6 +167,7 @@ class DatabaseService {
           habitEffects:
               (row[_swapHabitEffectsColumnName] as String).split(", "),
           partOfDay: row[_swapPartOfDayColumnName] as String,
+          habitType: row[_swapHabitTypeColumnName] as String,
         );
       }).toList();
 

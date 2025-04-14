@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 class HabitInfo extends StatelessWidget {
   final bool isGood;
   final String title;
+  final String partOfDay;
 
   final List<String> effects;
 
@@ -12,6 +13,7 @@ class HabitInfo extends StatelessWidget {
     required this.isGood,
     required this.title,
     required this.effects,
+    required this.partOfDay,
   });
 
   @override
@@ -29,18 +31,6 @@ class HabitInfo extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header Section
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Center(
-                  child: Text(
-                    "Habit Details",
-                    style: textTheme.titleLarge,
-                  ),
-                ),
-              ],
-            ),
 
             const SizedBox(height: 16.0),
             // Occurrence Detail Card
@@ -64,6 +54,7 @@ class HabitInfo extends StatelessWidget {
                             "When does it occur?",
                             style: textTheme.titleMedium,
                           ),
+                          Text(partOfDay)
                         ],
                       ),
                     ),
@@ -73,40 +64,10 @@ class HabitInfo extends StatelessWidget {
             ),
             const SizedBox(height: 16.0),
             // Impact / Destructiveness Detail Card with significance indicator.
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // _buildSignificanceIndicator(),
-                    const SizedBox(width: 12.0),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            isGood
-                                ? "Level of Impact"
-                                : "Destructiveness of the Habit",
-                            style: textTheme.titleMedium,
-                          ),
-                          const SizedBox(height: 4.0),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 24.0),
+
             // Effects (Benefits or Side Effects) Section
             Text(
-              isGood ? "Benefits of Habit Exchange" : "Destructiveness",
+              isGood ? "Benefits of Habit " : "Harms of habit",
               style: textTheme.titleLarge,
             ),
             const SizedBox(height: 8.0),
