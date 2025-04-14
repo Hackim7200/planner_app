@@ -1,20 +1,27 @@
-// class Habit {
-//   int? id;
-//   String title;
-//   String type;
-//   double duration;
-//   String partOfDay;
-//   String description;
-//   List<String> whichDays;
+// A simple Habit model for swap items; modify properties as needed.
+class Habit {
+  final int id;
+  final String addictionTitle;
+  final List<String> addictionEffects;
 
-//   Habit({
-//     this.id,
-//     required this.title,
-//     required this.type,
-//     required this.duration,
-//     required this.partOfDay,
-//     required this.description,
-//     required this.whichDays,
+  final String habitTitle;
+  final List<String> habitEffects;
 
-//   });
-// }
+  final String partOfDay;
+  final int priority;
+
+  Habit({
+    required this.priority,
+    required this.id,
+    required this.addictionTitle,
+    required this.addictionEffects,
+    required this.habitTitle,
+    required this.habitEffects,
+    required this.partOfDay,
+  });
+
+  @override
+  String toString() {
+    return 'Habit{id: $id, addictionTitle: $addictionTitle, addictionEffects: $addictionEffects, , habitTitle: $habitTitle, habitEffects: $habitEffects , partOfDay: $partOfDay}';
+  }
+}

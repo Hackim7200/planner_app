@@ -1,5 +1,6 @@
 import 'package:path/path.dart';
-import 'package:planner_app/database/Habit.dart';
+import 'package:planner_app/database/habit.dart';
+
 import 'package:planner_app/database/Task.dart';
 import 'package:planner_app/database/event.dart';
 
@@ -20,14 +21,16 @@ class DatabaseService {
   final String _taskDescriptionColumnName = "description";
   final String _taskOrderColumnName = "task_order";
 
-  final String _habitsTableName = "Habits";
-  final String _habitIdColumnName = "id";
-  final String _habitTitleColumnName = "title";
-  final String _habitPartOfDayColumnName = "part_of_day";
-  final String _habitWhichDaysColumnName = "which_days";
-  final String _habitDescriptionColumnName = "description";
-  final String _habitTypeColumnName = "type";
-  final String _habitDurationColumnName = "duration";
+  final String _swapTableName = "Swap";
+  final String _swapIdColumnName = "id";
+  final String _swapAddictionTitleColumnName = "addiction_title";
+  final String _swapAddictionEffectsColumnName = "addiction_effects";
+
+  final String _swapHabitTitleColumnName = "habit_title";
+  final String _swapHabitEffectsColumnName = "habit_effects";
+
+  final String _swapPartOfDayColumnName = "part_of_day";
+  final String _swapPriotityColumnName = "priority";
 
   final String _eventTableName = "Events";
   final String _eventIdColumnName = "id";
@@ -36,8 +39,13 @@ class DatabaseService {
   final String _eventDescriptionColumnName = "description";
   final String _eventBackgroundColorColumnName = "background_color";
   final String _eventFontColorColumnName = "font_color";
-
   final String _eventIconColumnName = "icon_path";
+
+  final String _bucketListTableName = "BucketList";
+  final String _bucketListIdColumnName = "id";
+  final String _bucketListTitleColumnName = "title";
+  final String _bucketListDescriptionColumnName = "description";
+  final String _bucketListDueDateColumnName = "due_date";
 
   DatabaseService._internal();
 
@@ -72,31 +80,31 @@ class DatabaseService {
           """);
 
           db.execute("""
-                CREATE TABLE $_habitsTableName (
-              $_habitIdColumnName INTEGER PRIMARY KEY AUTOINCREMENT,
-              $_habitTitleColumnName TEXT NOT NULL,
-              $_habitPartOfDayColumnName TEXT NOT NULL,   
-              $_habitWhichDaysColumnName TEXT NOT NULL,
-              $_habitTypeColumnName TEXT NOT NULL,
-              $_habitDurationColumnName REAL NOT NULL,
-              $_habitDescriptionColumnName TEXT NOT NULL
+                CREATE TABLE $_swapTableName (
+              $_swapIdColumnName INTEGER PRIMARY KEY AUTOINCREMENT,
+              $_swapPriotityColumnName INTEGER NOT NULL,
+              $_swapAddictionTitleColumnName TEXT NOT NULL,
+              $_swapAddictionEffectsColumnName TEXT ,
 
+              $_swapHabitTitleColumnName TEXT NOT NULL,
+              $_swapHabitEffectsColumnName TEXT,
+
+              $_swapPartOfDayColumnName TEXT NOT NULL
               
-
           );
           """);
 
           db.execute("""
-  CREATE TABLE $_eventTableName (
-    $_eventIdColumnName INTEGER PRIMARY KEY AUTOINCREMENT,
-    $_eventTitleColumnName TEXT NOT NULL,
-    $_eventDueDateColumnName TEXT NOT NULL,
-    $_eventDescriptionColumnName TEXT NOT NULL,
-    $_eventBackgroundColorColumnName TEXT NOT NULL,
-    $_eventFontColorColumnName TEXT NOT NULL,
-    $_eventIconColumnName TEXT NOT NULL
-  );
-""");
+            CREATE TABLE $_eventTableName (
+              $_eventIdColumnName INTEGER PRIMARY KEY AUTOINCREMENT,
+              $_eventTitleColumnName TEXT NOT NULL,
+              $_eventDueDateColumnName TEXT NOT NULL,
+              $_eventDescriptionColumnName TEXT NOT NULL,
+              $_eventBackgroundColorColumnName TEXT NOT NULL,
+              $_eventFontColorColumnName TEXT NOT NULL,
+              $_eventIconColumnName TEXT NOT NULL
+            );
+          """);
         },
       );
     } catch (e) {
@@ -104,97 +112,71 @@ class DatabaseService {
     }
   }
 
-  Future<void> addTask(String title, String type, double duration,
-      String partOfDay, bool isToday) async {
-    try {
-      final db = await database;
-
-      final result = await db.rawQuery(
-          'SELECT MAX($_taskOrderColumnName) as max_order FROM $_tasksTableName WHERE $_taskPartOfDayColumnName = ?',
-          [partOfDay]);
-
-      int newOrder = (result.first['max_order'] as int? ?? -1) + 1;
-
-      String date = DateTime.now().toIso8601String();
-
-      if (isToday == false) {
-        date = DateTime.now().add(const Duration(days: 1)).toIso8601String();
-      }
-      await db.insert(
-        _tasksTableName,
-        {
-          _taskTitleColumnName: title,
-          _taskTypeColumnName: type,
-          _taskDurationColumnName: duration,
-          _taskCompletedColumnName: 0,
-          _taskPartOfDayColumnName: partOfDay,
-          _taskDueDateColumnName: date,
-          _taskDescriptionColumnName: "Your description here",
-          _taskOrderColumnName: newOrder,
-        },
-      );
-      print(
-          "Task added: $title, Type: $type, Duration: $duration, Part of Day: $partOfDay , Order: $newOrder, Date: $date");
-    } catch (e) {
-      throw Exception("Error adding task: $e");
-    }
-  }
-
-  Future<void> addHabit(String title, String type, double duration,
-      String partOfDay, String description, List<String> whichDays) async {
+  /// Inserts a new habit (swap entry) into the Swap table.
+  Future<void> addHabit(
+    int priority,
+    String partOfDay,
+    String addictionTitle,
+    String addictionEffects,
+    String habitTitle,
+    String habitEffects,
+  ) async {
     try {
       final db = await database;
 
       await db.insert(
-        _habitsTableName,
+        _swapTableName,
         {
-          _habitTitleColumnName: title,
-          _habitTypeColumnName: type,
-          _habitDurationColumnName: duration,
-          _habitPartOfDayColumnName: partOfDay,
-          _habitDescriptionColumnName: description,
-          _habitWhichDaysColumnName: whichDays.join(", "),
+          _swapPriotityColumnName: priority,
+          _swapAddictionTitleColumnName: addictionTitle,
+          _swapAddictionEffectsColumnName: addictionEffects,
+          _swapHabitTitleColumnName: habitTitle,
+          _swapHabitEffectsColumnName: habitEffects,
+          _swapPartOfDayColumnName: partOfDay,
         },
       );
       print(
-          "Habit added: $title, Type: $type, Duration: $duration, Part of Day: $partOfDay");
+          "Habit (swap) added: addiction: $addictionTitle, habit: $habitTitle");
     } catch (e) {
-      throw Exception("Error adding Habit: $e");
+      throw Exception("Error adding habit (swap): $e");
     }
   }
 
-  // Future<List<Habit>> getAllHabits() async {
-  //   try {
-  //     final db = await database;
-  //     final data = await db.query(_habitsTableName);
+  Future<List<Habit>> getAllHabits() async {
+    try {
+      final db = await database;
+      // Use the correct table name.
+      final data = await db.query(_swapTableName);
 
-  //     List<Habit> habits = data.map((habit) {
-  //       return Habit(
-  //         id: habit[_habitIdColumnName] as int,
-  //         title: habit[_habitTitleColumnName] as String,
-  //         type: habit[_habitTypeColumnName] as String,
-  //         duration: (habit[_habitDurationColumnName] as num).toDouble(),
-  //         partOfDay: habit[_habitPartOfDayColumnName] as String,
-  //         description: habit[_habitDescriptionColumnName] as String,
-  //         whichDays:
-  //             (habit[_habitWhichDaysColumnName] as String?)?.split(", ") ?? [],
-  //       );
-  //     }).toList();
+      List<Habit> habits = data.map((row) {
+        return Habit(
+          id: row[_swapIdColumnName] as int,
+          priority: row[_swapPriotityColumnName] as int,
+          addictionTitle: row[_swapAddictionTitleColumnName] as String,
+          addictionEffects:
+              (row[_swapAddictionEffectsColumnName] as String).split(", "),
+          habitTitle: row[_swapHabitTitleColumnName] as String,
+          habitEffects:
+              (row[_swapHabitEffectsColumnName] as String).split(", "),
+          partOfDay: row[_swapPartOfDayColumnName] as String,
+        );
+      }).toList();
 
-  //     print("Habits retrieved (${habits.length}): $habits");
-  //     return habits;
-  //   } catch (e) {
-  //     throw Exception("Error retrieving Habit: $e");
-  //   }
-  // }
+      print("Habits retrieved (${habits.length}): $habits");
+      return habits;
+    } catch (e) {
+      throw Exception("Error retrieving habits: $e");
+    }
+  }
 
+  /// Deletes a habit (swap entry) from the Swap table by id.
   Future<void> deleteHabit(int id) async {
     try {
       final db = await database;
 
       int deletedCount = await db.delete(
-        _habitsTableName,
-        where: '$_habitIdColumnName = ?',
+        _swapTableName,
+        where: '$_swapIdColumnName = ?',
         whereArgs: [id],
       );
 
@@ -204,7 +186,7 @@ class DatabaseService {
         print("Habit with id $id deleted successfully.");
       }
     } catch (e) {
-      throw Exception("Error deleting Habit with id $id: $e");
+      throw Exception("Error deleting habit with id $id: $e");
     }
   }
 
@@ -318,6 +300,42 @@ class DatabaseService {
       });
     } catch (e) {
       throw Exception("Error deleting task: $e");
+    }
+  }
+
+  Future<void> addTask(String title, String type, double duration,
+      String partOfDay, bool isToday) async {
+    try {
+      final db = await database;
+
+      final result = await db.rawQuery(
+          'SELECT MAX($_taskOrderColumnName) as max_order FROM $_tasksTableName WHERE $_taskPartOfDayColumnName = ?',
+          [partOfDay]);
+
+      int newOrder = (result.first['max_order'] as int? ?? -1) + 1;
+
+      String date = DateTime.now().toIso8601String();
+
+      if (isToday == false) {
+        date = DateTime.now().add(const Duration(days: 1)).toIso8601String();
+      }
+      await db.insert(
+        _tasksTableName,
+        {
+          _taskTitleColumnName: title,
+          _taskTypeColumnName: type,
+          _taskDurationColumnName: duration,
+          _taskCompletedColumnName: 0,
+          _taskPartOfDayColumnName: partOfDay,
+          _taskDueDateColumnName: date,
+          _taskDescriptionColumnName: "Your description here",
+          _taskOrderColumnName: newOrder,
+        },
+      );
+      print(
+          "Task added: $title, Type: $type, Duration: $duration, Part of Day: $partOfDay , Order: $newOrder, Date: $date");
+    } catch (e) {
+      throw Exception("Error adding task: $e");
     }
   }
 

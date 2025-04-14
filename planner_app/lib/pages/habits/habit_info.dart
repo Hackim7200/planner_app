@@ -3,19 +3,15 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class HabitInfo extends StatelessWidget {
   final bool isGood;
-  final String title, description;
-  final int significance;
+  final String title;
+
   final List<String> effects;
-  final List<String> occurrence; // Corrected spelling
 
   const HabitInfo({
     super.key,
     required this.isGood,
     required this.title,
     required this.effects,
-    required this.significance,
-    required this.occurrence,
-    required this.description,
   });
 
   @override
@@ -43,14 +39,6 @@ class HabitInfo extends StatelessWidget {
                     style: textTheme.titleLarge,
                   ),
                 ),
-                const SizedBox(height: 8.0),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                  child: Text(
-                    description,
-                    style: textTheme.bodyMedium,
-                  ),
-                ),
               ],
             ),
 
@@ -76,13 +64,6 @@ class HabitInfo extends StatelessWidget {
                             "When does it occur?",
                             style: textTheme.titleMedium,
                           ),
-                          const SizedBox(height: 4.0),
-                          Text(
-                            occurrence.isNotEmpty
-                                ? occurrence.join(', ')
-                                : "No occurrences specified",
-                            style: textTheme.bodyMedium,
-                          ),
                         ],
                       ),
                     ),
@@ -102,7 +83,7 @@ class HabitInfo extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSignificanceIndicator(),
+                    // _buildSignificanceIndicator(),
                     const SizedBox(width: 12.0),
                     Expanded(
                       child: Column(
@@ -148,30 +129,24 @@ class HabitInfo extends StatelessWidget {
   }
 
   /// Builds a significance indicator widget with dynamic background color based on habit type and significance level.
-  Widget _buildSignificanceIndicator() {
-    // Determine if the habit is considered positive.
+  // Widget _buildSignificanceIndicator() {
+  // Determine if the habit is considered positive.
 
-    // Map the significance value (1-10) to a valid shade (multiples of 100 between 100 and 900).
-    // If significance is 10, use 900; otherwise use significance * 100.
-    final int computedShade = significance < 10 ? significance * 100 : 900;
+  // Choose color based on habit type.
 
-    // Choose color based on habit type.
-    final Color backgroundColor =
-        isGood ? Colors.green[computedShade]! : Colors.red[computedShade]!;
-
-    return CircleAvatar(
-      radius: 25,
-      backgroundColor: backgroundColor,
-      child: Text(
-        significance.toString(),
-        style: const TextStyle(
-          fontSize: 16,
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
+  //   return CircleAvatar(
+  //     radius: 25,
+  //     backgroundColor: backgroundColor,
+  //     child: Text(
+  //       significance.toString(),
+  //       style: const TextStyle(
+  //         fontSize: 16,
+  //         color: Colors.white,
+  //         fontWeight: FontWeight.bold,
+  //       ),
+  //     ),
+  //   );
+  // }
 
   /// Helper method to build a list of ListTiles from a list of strings.
   List<Widget> _buildInfoList(List<String> items) {
