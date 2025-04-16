@@ -25,7 +25,7 @@ class DatabaseService {
   final String _swapIdColumnName = "id";
 
   final String _swapPartOfDayColumnName = "part_of_day";
-  final String _swapPriotityColumnName = "priority";
+  final String _swapPriorityColumnName = "priority";
   final String _swapHabitTypeColumnName = "habit_type";
 
   final String _swapAddictionTitleColumnName = "addiction_title";
@@ -84,7 +84,7 @@ class DatabaseService {
           db.execute("""
                 CREATE TABLE $_swapTableName (
               $_swapIdColumnName INTEGER PRIMARY KEY AUTOINCREMENT,
-              $_swapPriotityColumnName INTEGER NOT NULL,
+              $_swapPriorityColumnName INTEGER NOT NULL,
 
               $_swapHabitTypeColumnName TEXT NOT NULL,
 
@@ -120,31 +120,23 @@ class DatabaseService {
   }
 
   /// Inserts a new habit (swap entry) into the Swap table.
-  Future<void> addHabit(
-      int priority,
-      String partOfDay,
-      String addictionTitle,
-      String addictionEffects,
-      String habitTitle,
-      String habitEffects,
-      String habitType) async {
+  Future<void> addHabit(int priority, String partOfDay, String addictionTitle,
+      String habitTitle, String habitType) async {
     try {
       final db = await database;
 
       await db.insert(
         _swapTableName,
         {
-          _swapPriotityColumnName: priority,
+          _swapPriorityColumnName: priority,
           _swapHabitTypeColumnName: habitType,
           _swapAddictionTitleColumnName: addictionTitle,
-          _swapAddictionEffectsColumnName: addictionEffects,
           _swapHabitTitleColumnName: habitTitle,
-          _swapHabitEffectsColumnName: habitEffects,
           _swapPartOfDayColumnName: partOfDay,
         },
       );
       print(
-          "Habit (swap) added: addiction: $addictionTitle, habit: $habitTitle");
+          "Habit (swap) added: addiction: $addictionTitle, habit: $habitTitle, type: $habitType");
     } catch (e) {
       throw Exception("Error adding habit (swap): $e");
     }
@@ -159,13 +151,14 @@ class DatabaseService {
       List<Habit> habits = data.map((row) {
         return Habit(
           id: row[_swapIdColumnName] as int,
-          priority: row[_swapPriotityColumnName] as int,
+          priority: row[_swapPriorityColumnName] as int,
           addictionTitle: row[_swapAddictionTitleColumnName] as String,
-          addictionEffects:
-              (row[_swapAddictionEffectsColumnName] as String).split(", "),
           habitTitle: row[_swapHabitTitleColumnName] as String,
+          addictionEffects:
+              (row[_swapAddictionEffectsColumnName] as String? ?? "")
+                  .split(", "),
           habitEffects:
-              (row[_swapHabitEffectsColumnName] as String).split(", "),
+              (row[_swapHabitEffectsColumnName] as String? ?? "").split(", "),
           partOfDay: row[_swapPartOfDayColumnName] as String,
           habitType: row[_swapHabitTypeColumnName] as String,
         );
@@ -175,6 +168,114 @@ class DatabaseService {
       return habits;
     } catch (e) {
       throw Exception("Error retrieving habits: $e");
+    }
+  }
+
+  Future<List<String>> getHabitEffects(int id, bool isGood) async {
+    try {
+      final db = await database;
+      final data = await db.query(
+        _swapTableName,
+        where: "$_swapIdColumnName = ?",
+        whereArgs: [id],
+      );
+
+      // Select the correct column based on whether the habit is good.
+      final columnName = isGood
+          ? _swapHabitEffectsColumnName
+          : _swapAddictionEffectsColumnName;
+
+      // If no data or null value in the column, return an empty list.
+      if (data.isEmpty || data.first[columnName] == null) {
+        print("No data found for id: $id");
+        return [];
+      }
+
+      final String effectsString = data.first[columnName] as String;
+      final List<String> effects = effectsString.split(", ");
+
+      print("Habits retrieved: $data");
+      return effects;
+    } catch (e) {
+      throw Exception("Error retrieving habits: $e");
+    }
+  }
+
+  /// Updates an existing habit (swap entry) in the Swap table.
+  Future<void> updateHabit({
+    required int id,
+    required int priority,
+    required String partOfDay,
+    required String addictionTitle,
+    required String addictionEffects,
+    required String habitTitle,
+    required String habitEffects,
+    required String habitType,
+  }) async {
+    try {
+      final db = await database;
+
+      // Create a map of the new values
+      Map<String, Object?> updatedValues = {
+        _swapPriorityColumnName: priority,
+        _swapPartOfDayColumnName: partOfDay,
+        _swapAddictionTitleColumnName: addictionTitle,
+        _swapAddictionEffectsColumnName: addictionEffects,
+        _swapHabitTitleColumnName: habitTitle,
+        _swapHabitEffectsColumnName: habitEffects,
+        _swapHabitTypeColumnName: habitType,
+      };
+
+      // Execute the update query
+      int count = await db.update(
+        _swapTableName,
+        updatedValues,
+        where: "$_swapIdColumnName = ?",
+        whereArgs: [id],
+      );
+
+      if (count == 0) {
+        print("No habit found with id: $id");
+      } else {
+        print("Habit with id $id updated successfully.");
+      }
+    } catch (e) {
+      throw Exception("Error updating habit with id $id: $e");
+    }
+  }
+
+  /// Updates an existing habit (swap entry) in the Swap table.
+  Future<void> updateHabitEffects({
+    required int id,
+    required bool isGood,
+    required String effects,
+  }) async {
+    try {
+      final db = await database;
+
+      // Determine which column to update based on whether it's good or harmful.
+      final String columnName = isGood
+          ? _swapHabitEffectsColumnName
+          : _swapAddictionEffectsColumnName;
+
+      // Create a map with the appropriate column and the new effects.
+      final Map<String, Object?> updatedValues = {columnName: effects};
+
+      // Execute the update query.
+      final int count = await db.update(
+        _swapTableName,
+        updatedValues,
+        where: "$_swapIdColumnName = ?",
+        whereArgs: [id],
+      );
+
+      if (count == 0) {
+        print("No habit found with id: $id");
+      } else {
+        print("Habit with id $id updated successfully.");
+      }
+    } catch (e) {
+      throw Exception("Error updating habit with id $id: $e");
     }
   }
 

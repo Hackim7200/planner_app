@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:planner_app/pages/bucket_list.dart';
+import 'package:planner_app/pages/backlog/backlog.dart';
 import 'package:planner_app/pages/habits/habit_page.dart';
 
 import 'package:planner_app/pages/how_to.dart';
@@ -34,30 +34,6 @@ class SideMenu extends StatelessWidget {
                 ],
               )),
           ListTile(
-            leading: Icon(Icons.question_mark),
-            title: const Text('How to use this app'),
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => HowTo(),
-                  ));
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.star_border_outlined),
-            title: const Text('My bucket list'),
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => BucketList(),
-                  ));
-              // Update the state of the app.
-              // ...
-            },
-          ),
-          ListTile(
             leading: Icon(Icons.speed),
             title: const Text('Habbits'),
             onTap: () {
@@ -68,6 +44,44 @@ class SideMenu extends StatelessWidget {
                   ));
               // Update the state of the app.
               // ...
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.speed),
+            title: const Text('Routine'),
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => HabitPage(),
+                  ));
+              // Update the state of the app.
+              // ...
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.speed),
+            title: const Text('Backlog'),
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Backlog(),
+                  ));
+              // Update the state of the app.
+              // ...
+            },
+          ),
+          SizedBox(height: 100),
+          ListTile(
+            leading: Icon(Icons.question_mark),
+            title: const Text('How to use this app'),
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => HowTo(),
+                  ));
             },
           ),
         ],

@@ -27,19 +27,16 @@ class _AddHabitState extends State<AddHabit> {
   // Controllers for the text fields.
   final TextEditingController addictionTitleController =
       TextEditingController();
-  final TextEditingController addictionEffectsController =
-      TextEditingController();
+
   final TextEditingController habitTitleController = TextEditingController();
-  final TextEditingController habitEffectsController = TextEditingController();
 
   String? _selectedHabitType; // Holds selected habit type
 
   @override
   void dispose() {
     addictionTitleController.dispose();
-    addictionEffectsController.dispose();
+
     habitTitleController.dispose();
-    habitEffectsController.dispose();
     super.dispose();
   }
 
@@ -60,20 +57,18 @@ class _AddHabitState extends State<AddHabit> {
     try {
       final int priority = _sliderPriority;
       final String addictionTitle = addictionTitleController.text.trim();
-      final String addictionEffects = addictionEffectsController.text;
-      final String habitTitle = habitTitleController.text.trim();
-      final String habitEffects = habitEffectsController.text;
 
-      await _databaseService.addHabit(priority, partOfDay, addictionTitle,
-          addictionEffects, habitTitle, habitEffects, _selectedHabitType!);
+      final String habitTitle = habitTitleController.text.trim();
+
+      await _databaseService.addHabit(
+          priority, partOfDay, addictionTitle, habitTitle, _selectedHabitType!);
 
       widget.onAddHabit();
       if (mounted) {
         Navigator.of(context).pop();
         addictionTitleController.clear();
-        addictionEffectsController.clear();
         habitTitleController.clear();
-        habitEffectsController.clear();
+
         setState(() {
           _sliderPriority = 1;
           _selectedHabitType = null;
@@ -114,7 +109,7 @@ class _AddHabitState extends State<AddHabit> {
             return AlertDialog(
               title: const Center(
                 child: Text(
-                  'Add Habit',
+                  'Exchange Habit',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -158,27 +153,24 @@ class _AddHabitState extends State<AddHabit> {
                                 style: TextStyle(fontSize: 16),
                               ),
                               const SizedBox(height: 8),
-                              ToggleButtons(
-                                direction: Axis.vertical,
-                                isSelected: selectedPartsList,
-                                onPressed: (int index) {
-                                  setStateDialog(() {
-                                    selectedPartsList[index] =
-                                        !selectedPartsList[index];
-                                  });
-                                },
-                                children: parts
-                                    .map(
-                                      (part) => Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 12.0),
-                                        child: Text(part),
-                                      ),
-                                    )
-                                    .toList(),
+                              //choice chip is better than toggle button when it comes to compact space
+                              Wrap(
+                                spacing: 8.0,
+                                children: List.generate(parts.length, (index) {
+                                  return ChoiceChip(
+                                    label: Text(parts[index]),
+                                    selected: selectedPartsList[index],
+                                    onSelected: (bool selected) {
+                                      setStateDialog(() {
+                                        selectedPartsList[index] = selected;
+                                      });
+                                    },
+                                  );
+                                }),
                               ),
                             ],
                           ),
+
                           const SizedBox(height: 10),
 
                           // Habit Type Dropdown
@@ -208,11 +200,11 @@ class _AddHabitState extends State<AddHabit> {
                           TextFormField(
                             controller: addictionTitleController,
                             decoration: const InputDecoration(
-                              labelText: 'Addiction Title',
+                              labelText: 'Old Habit',
                             ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return 'Please enter addiction title';
+                                return 'Please enter habit title';
                               }
                               return null;
                             },
@@ -223,7 +215,7 @@ class _AddHabitState extends State<AddHabit> {
                           TextFormField(
                             controller: habitTitleController,
                             decoration: const InputDecoration(
-                              labelText: 'Habit Title',
+                              labelText: 'New Habit',
                             ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
@@ -235,12 +227,6 @@ class _AddHabitState extends State<AddHabit> {
                           const SizedBox(height: 10),
 
                           // Habit Effects input field (Optional)
-                          TextFormField(
-                            controller: habitEffectsController,
-                            decoration: const InputDecoration(
-                              labelText: 'Habit Effects',
-                            ),
-                          ),
                         ],
                       ),
                     ),

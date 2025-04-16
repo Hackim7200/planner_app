@@ -1,28 +1,70 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:planner_app/database/database_service.dart';
+import 'package:planner_app/database/habit.dart';
+import 'package:planner_app/pages/habits/add_effects.dart';
 
-class HabitInfo extends StatelessWidget {
+class HabitInfo extends StatefulWidget {
   final bool isGood;
-  final String title;
-  final String partOfDay;
-
-  final List<String> effects;
+  final Habit habit;
 
   const HabitInfo({
-    super.key,
+    Key? key,
     required this.isGood,
-    required this.title,
-    required this.effects,
-    required this.partOfDay,
-  });
+    required this.habit,
+  }) : super(key: key);
+
+  @override
+  _HabitInfoState createState() => _HabitInfoState();
+}
+
+class _HabitInfoState extends State<HabitInfo> {
+  final DatabaseService _databaseService = DatabaseService.instance;
+
+  // Initialize currentEffects as an empty list.
+  List<String> currentEffects = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCurrentEffects();
+  }
+
+  /// Loads the current habit effects from the database asynchronously
+  Future<void> _loadCurrentEffects() async {
+    try {
+      final effects = await _databaseService.getHabitEffects(
+          widget.habit.id, widget.isGood);
+      setState(() {
+        currentEffects = effects;
+      });
+    } catch (e) {
+      print("Error loading habit effects: $e");
+    }
+  }
+
+  /// Updates the habit effects in the database using the values from currentEffects.
+  Future<void> updateHabitEffects() async {
+    setState(() {
+      // For example purposes, add a fixed string to currentEffects.
+      currentEffects.add("item added to list");
+    });
+    await _databaseService.updateHabitEffects(
+      id: widget.habit.id,
+      effects: currentEffects.join(", "),
+      isGood: widget.isGood,
+    );
+
+    // Optionally, you could refresh the local list from the database:
+    // await _loadCurrentEffects();
+  }
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: Text(widget.habit.habitTitle),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -30,8 +72,6 @@ class HabitInfo extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header Section
-
             const SizedBox(height: 16.0),
             // Occurrence Detail Card
             Card(
@@ -54,7 +94,7 @@ class HabitInfo extends StatelessWidget {
                             "When does it occur?",
                             style: textTheme.titleMedium,
                           ),
-                          Text(partOfDay)
+                          Text(widget.habit.partOfDay),
                         ],
                       ),
                     ),
@@ -63,12 +103,23 @@ class HabitInfo extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16.0),
-            // Impact / Destructiveness Detail Card with significance indicator.
-
             // Effects (Benefits or Side Effects) Section
-            Text(
-              isGood ? "Benefits of Habit " : "Harms of habit",
-              style: textTheme.titleLarge,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  widget.isGood ? "Benefits of Habit" : "Harms of Habit",
+                  style: textTheme.titleLarge,
+                ),
+                AddEffect(
+                  onAddHabit: () {
+                    setState(() {});
+                  },
+                  isGood: widget.isGood,
+                  id: widget.habit.id,
+                  effects: currentEffects,
+                )
+              ],
             ),
             const SizedBox(height: 8.0),
             Card(
@@ -78,8 +129,37 @@ class HabitInfo extends StatelessWidget {
               ),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: _buildInfoList(effects),
+                child: FutureBuilder<List<String>>(
+                  future: _databaseService.getHabitEffects(
+                      widget.habit.id, widget.isGood),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text("Error: ${snapshot.error}"));
+                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return const Center(child: Text("No effects available."));
+                    } else {
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: snapshot.data!.length,
+                        itemBuilder: (context, index) {
+                          String effect = snapshot.data![index];
+                          return ListTile(
+                            leading: Icon(
+                              widget.isGood
+                                  ? FontAwesomeIcons.circleCheck
+                                  : FontAwesomeIcons.circleXmark,
+                            ),
+                            title: Text(effect),
+                            contentPadding: EdgeInsets.zero,
+                            dense: true,
+                          );
+                        },
+                      );
+                    }
+                  },
                 ),
               ),
             ),
@@ -87,39 +167,5 @@ class HabitInfo extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  /// Builds a significance indicator widget with dynamic background color based on habit type and significance level.
-  // Widget _buildSignificanceIndicator() {
-  // Determine if the habit is considered positive.
-
-  // Choose color based on habit type.
-
-  //   return CircleAvatar(
-  //     radius: 25,
-  //     backgroundColor: backgroundColor,
-  //     child: Text(
-  //       significance.toString(),
-  //       style: const TextStyle(
-  //         fontSize: 16,
-  //         color: Colors.white,
-  //         fontWeight: FontWeight.bold,
-  //       ),
-  //     ),
-  //   );
-  // }
-
-  /// Helper method to build a list of ListTiles from a list of strings.
-  List<Widget> _buildInfoList(List<String> items) {
-    return items.map((item) {
-      return ListTile(
-        leading: Icon(isGood
-            ? FontAwesomeIcons.circleCheck
-            : FontAwesomeIcons.circleXmark),
-        title: Text(item),
-        contentPadding: EdgeInsets.zero,
-        dense: true,
-      );
-    }).toList();
   }
 }

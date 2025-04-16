@@ -7,9 +7,14 @@ import 'package:planner_app/pages/habits/habit_info.dart';
 // Ensure your Habit model is imported if defined in another file
 // For example: import 'package:planner_app/models/habit.dart';
 
-class HabitPage extends StatelessWidget {
+class HabitPage extends StatefulWidget {
   const HabitPage({super.key});
 
+  @override
+  State<HabitPage> createState() => _HabitPageState();
+}
+
+class _HabitPageState extends State<HabitPage> {
   @override
   Widget build(BuildContext context) {
     final _databaseService = DatabaseService.instance;
@@ -17,7 +22,11 @@ class HabitPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Habit Exchange'),
-        actions: [AddHabit(onAddHabit: () {})],
+        actions: [
+          AddHabit(onAddHabit: () {
+            setState(() {});
+          })
+        ],
       ),
       body: FutureBuilder<List>(
         // Expecting a list of Habit objects.
@@ -55,10 +64,8 @@ class HabitPage extends StatelessWidget {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => HabitInfo(
+                                        habit: habit,
                                         isGood: false,
-                                        title: habit.addictionTitle,
-                                        effects: habit.addictionEffects,
-                                        partOfDay: habit.partOfDay,
                                       ),
                                     ),
                                   );
@@ -97,9 +104,7 @@ class HabitPage extends StatelessWidget {
                                     MaterialPageRoute(
                                       builder: (context) => HabitInfo(
                                         isGood: true,
-                                        title: habit.habitTitle,
-                                        effects: habit.habitEffects,
-                                        partOfDay: habit.partOfDay,
+                                        habit: habit,
                                       ),
                                     ),
                                   );
