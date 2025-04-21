@@ -1,0 +1,15 @@
+import 'package:flutter/material.dart';
+
+class Routine extends StatelessWidget {
+  const Routine({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Routine"),
+      ),
+      body: Center(child: Text("Functionality coming soon!")),
+    );
+  }
+}

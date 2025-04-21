@@ -1,4 +1,5 @@
 import 'package:path/path.dart';
+import 'package:planner_app/database/backlog.dart';
 import 'package:planner_app/database/habit.dart';
 
 import 'package:planner_app/database/Task.dart';
@@ -30,9 +31,15 @@ class DatabaseService {
 
   final String _swapAddictionTitleColumnName = "addiction_title";
   final String _swapAddictionEffectsColumnName = "addiction_effects";
+  final String _swapAddictionTriggersColumnName = "addiction_triggers";
+  final String _swapAddictionPleasuresColumnName = "addiction_pleasures";
+  final String _swapAddictionActionsColumnName = "addiction_actions";
 
   final String _swapHabitTitleColumnName = "habit_title";
   final String _swapHabitEffectsColumnName = "habit_effects";
+  final String _swapHabitTriggersColumnName = "habit_triggers";
+  final String _swapHabitPleasuresColumnName = "habit_pleasures";
+  final String _swapHabitActionsColumnName = "habit_actions";
 
   final String _eventTableName = "Events";
   final String _eventIdColumnName = "id";
@@ -43,11 +50,11 @@ class DatabaseService {
   final String _eventFontColorColumnName = "font_color";
   final String _eventIconColumnName = "icon_path";
 
-  final String _bucketListTableName = "BucketList";
-  final String _bucketListIdColumnName = "id";
-  final String _bucketListTitleColumnName = "title";
-  final String _bucketListDescriptionColumnName = "description";
-  final String _bucketListDueDateColumnName = "due_date";
+  final String _backlogTableName = "Backlog";
+  final String _backlogIdColumnName = "id";
+  final String _backlogTitleColumnName = "title";
+  final String _backlogDescriptionColumnName = "description";
+  final String _backlogTimelineColumnName = "timeline";
 
   DatabaseService._internal();
 
@@ -67,40 +74,40 @@ class DatabaseService {
         version: 1,
         onCreate: (db, version) {
           db.execute("""
-                CREATE TABLE $_tasksTableName (
+            CREATE TABLE $_tasksTableName (
               $_taskIdColumnName INTEGER PRIMARY KEY AUTOINCREMENT,
               $_taskDueDateColumnName TEXT NOT NULL,
               $_taskTitleColumnName TEXT NOT NULL,
               $_taskTypeColumnName TEXT NOT NULL,
               $_taskDurationColumnName REAL NOT NULL,
-              $_taskCompletedColumnName INTEGER NOT NULL,
+              $_taskCompletedColumnName INTEGER NOT NULL DEFAULT 0,
               $_taskPartOfDayColumnName TEXT NOT NULL,
               $_taskDescriptionColumnName TEXT NOT NULL,
               $_taskOrderColumnName INTEGER NOT NULL
-
-          );
+            );
           """);
 
+          // Create Swap Table
           db.execute("""
-                CREATE TABLE $_swapTableName (
+            CREATE TABLE $_swapTableName (
               $_swapIdColumnName INTEGER PRIMARY KEY AUTOINCREMENT,
               $_swapPriorityColumnName INTEGER NOT NULL,
-
               $_swapHabitTypeColumnName TEXT NOT NULL,
-
-
-
               $_swapAddictionTitleColumnName TEXT NOT NULL,
-              $_swapAddictionEffectsColumnName TEXT ,
-
+              $_swapAddictionEffectsColumnName TEXT,
+              $_swapAddictionTriggersColumnName TEXT,  
+              $_swapAddictionPleasuresColumnName TEXT,  
               $_swapHabitTitleColumnName TEXT NOT NULL,
               $_swapHabitEffectsColumnName TEXT,
-
+              $_swapHabitTriggersColumnName TEXT,    
+              $_swapHabitPleasuresColumnName TEXT,    
+              $_swapHabitActionsColumnName TEXT,
+              $_swapAddictionActionsColumnName TEXT,
               $_swapPartOfDayColumnName TEXT NOT NULL
-              
-          );
+            );
           """);
 
+          // Create Events Table
           db.execute("""
             CREATE TABLE $_eventTableName (
               $_eventIdColumnName INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -110,6 +117,16 @@ class DatabaseService {
               $_eventBackgroundColorColumnName TEXT NOT NULL,
               $_eventFontColorColumnName TEXT NOT NULL,
               $_eventIconColumnName TEXT NOT NULL
+            );
+          """);
+
+          // Create Backlog Table
+          db.execute("""
+            CREATE TABLE $_backlogTableName (
+              $_backlogIdColumnName INTEGER PRIMARY KEY AUTOINCREMENT,
+              $_backlogTitleColumnName TEXT NOT NULL,
+              $_backlogDescriptionColumnName TEXT NOT NULL,
+              $_backlogTimelineColumnName TEXT NOT NULL
             );
           """);
         },
@@ -154,48 +171,28 @@ class DatabaseService {
           priority: row[_swapPriorityColumnName] as int,
           addictionTitle: row[_swapAddictionTitleColumnName] as String,
           habitTitle: row[_swapHabitTitleColumnName] as String,
+          partOfDay: row[_swapPartOfDayColumnName] as String,
+          habitType: row[_swapHabitTypeColumnName] as String,
           addictionEffects:
               (row[_swapAddictionEffectsColumnName] as String? ?? "")
                   .split(", "),
+          addictionTriggers:
+              (row[_swapAddictionTriggersColumnName] as String? ?? "")
+                  .split(", "),
+          addictionPleasures:
+              (row[_swapAddictionPleasuresColumnName] as String? ?? "")
+                  .split(", "),
           habitEffects:
               (row[_swapHabitEffectsColumnName] as String? ?? "").split(", "),
-          partOfDay: row[_swapPartOfDayColumnName] as String,
-          habitType: row[_swapHabitTypeColumnName] as String,
+          habitTriggers:
+              (row[_swapHabitTriggersColumnName] as String? ?? "").split(", "),
+          habitPleasures:
+              (row[_swapHabitPleasuresColumnName] as String? ?? "").split(", "),
         );
       }).toList();
 
       print("Habits retrieved (${habits.length}): $habits");
       return habits;
-    } catch (e) {
-      throw Exception("Error retrieving habits: $e");
-    }
-  }
-
-  Future<List<String>> getHabitEffects(int id, bool isGood) async {
-    try {
-      final db = await database;
-      final data = await db.query(
-        _swapTableName,
-        where: "$_swapIdColumnName = ?",
-        whereArgs: [id],
-      );
-
-      // Select the correct column based on whether the habit is good.
-      final columnName = isGood
-          ? _swapHabitEffectsColumnName
-          : _swapAddictionEffectsColumnName;
-
-      // If no data or null value in the column, return an empty list.
-      if (data.isEmpty || data.first[columnName] == null) {
-        print("No data found for id: $id");
-        return [];
-      }
-
-      final String effectsString = data.first[columnName] as String;
-      final List<String> effects = effectsString.split(", ");
-
-      print("Habits retrieved: $data");
-      return effects;
     } catch (e) {
       throw Exception("Error retrieving habits: $e");
     }
@@ -244,25 +241,108 @@ class DatabaseService {
     }
   }
 
-  /// Updates an existing habit (swap entry) in the Swap table.
-  Future<void> updateHabitEffects({
+  // Get Effects
+  Future<List<String>> getEffects(int id, bool isGood) async {
+    try {
+      final db = await database;
+      final columnName = isGood
+          ? _swapHabitEffectsColumnName
+          : _swapAddictionEffectsColumnName;
+
+      final data = await db.query(
+        _swapTableName,
+        where: "$_swapIdColumnName = ?",
+        whereArgs: [id],
+      );
+
+      if (data.isEmpty || data.first[columnName] == null) {
+        print("No data found for id: $id");
+        return [];
+      }
+
+      final String effectsString = data.first[columnName] as String;
+      final List<String> effects =
+          effectsString.split(", ").where((e) => e.isNotEmpty).toList();
+
+      return effects;
+    } catch (e) {
+      throw Exception("Error retrieving effects for habit with id $id: $e");
+    }
+  }
+
+// Get Triggers
+  Future<List<String>> getTriggers(int id, bool isGood) async {
+    try {
+      final db = await database;
+      final columnName = isGood
+          ? _swapHabitTriggersColumnName
+          : _swapAddictionTriggersColumnName;
+
+      final data = await db.query(
+        _swapTableName,
+        where: "$_swapIdColumnName = ?",
+        whereArgs: [id],
+      );
+
+      if (data.isEmpty || data.first[columnName] == null) {
+        print("No data found for id: $id");
+        return [];
+      }
+
+      final String triggersString = data.first[columnName] as String;
+      final List<String> triggers =
+          triggersString.split(", ").where((e) => e.isNotEmpty).toList();
+
+      return triggers;
+    } catch (e) {
+      throw Exception("Error retrieving triggers for habit with id $id: $e");
+    }
+  }
+
+// Get Actions
+  Future<List<String>> getActions(int id, bool isGood) async {
+    try {
+      final db = await database;
+      final columnName = isGood
+          ? _swapHabitActionsColumnName
+          : _swapAddictionActionsColumnName;
+
+      final data = await db.query(
+        _swapTableName,
+        where: "$_swapIdColumnName = ?",
+        whereArgs: [id],
+      );
+
+      if (data.isEmpty || data.first[columnName] == null) {
+        print("No data found for id: $id");
+        return [];
+      }
+
+      final String actionsString = data.first[columnName] as String;
+      final List<String> actions =
+          actionsString.split(", ").where((e) => e.isNotEmpty).toList();
+
+      return actions;
+    } catch (e) {
+      throw Exception("Error retrieving actions for habit with id $id: $e");
+    }
+  }
+
+// Update Effects
+  Future<void> updateEffects({
     required int id,
     required bool isGood,
     required String effects,
   }) async {
     try {
       final db = await database;
-
-      // Determine which column to update based on whether it's good or harmful.
-      final String columnName = isGood
+      final columnName = isGood
           ? _swapHabitEffectsColumnName
           : _swapAddictionEffectsColumnName;
 
-      // Create a map with the appropriate column and the new effects.
       final Map<String, Object?> updatedValues = {columnName: effects};
 
-      // Execute the update query.
-      final int count = await db.update(
+      final count = await db.update(
         _swapTableName,
         updatedValues,
         where: "$_swapIdColumnName = ?",
@@ -272,31 +352,210 @@ class DatabaseService {
       if (count == 0) {
         print("No habit found with id: $id");
       } else {
-        print("Habit with id $id updated successfully.");
+        print("Effects updated for habit with id $id.");
       }
     } catch (e) {
-      throw Exception("Error updating habit with id $id: $e");
+      throw Exception("Error updating effects for habit with id $id: $e");
     }
   }
 
-  /// Deletes a habit (swap entry) from the Swap table by id.
-  Future<void> deleteHabit(int id) async {
+// Update Triggers
+  Future<void> updateTriggers({
+    required int id,
+    required bool isGood,
+    required String triggers,
+  }) async {
     try {
       final db = await database;
+      final columnName = isGood
+          ? _swapHabitTriggersColumnName
+          : _swapAddictionTriggersColumnName;
 
-      int deletedCount = await db.delete(
+      final Map<String, Object?> updatedValues = {columnName: triggers};
+
+      final count = await db.update(
         _swapTableName,
-        where: '$_swapIdColumnName = ?',
+        updatedValues,
+        where: "$_swapIdColumnName = ?",
         whereArgs: [id],
       );
 
-      if (deletedCount == 0) {
+      if (count == 0) {
         print("No habit found with id: $id");
       } else {
-        print("Habit with id $id deleted successfully.");
+        print("Triggers updated for habit with id $id.");
       }
     } catch (e) {
-      throw Exception("Error deleting habit with id $id: $e");
+      throw Exception("Error updating triggers for habit with id $id: $e");
+    }
+  }
+
+// Update Actions
+  Future<void> updateActions({
+    required int id,
+    required bool isGood,
+    required String actions,
+  }) async {
+    try {
+      final db = await database;
+      final columnName = isGood
+          ? _swapHabitActionsColumnName
+          : _swapAddictionActionsColumnName;
+
+      final Map<String, Object?> updatedValues = {columnName: actions};
+
+      final count = await db.update(
+        _swapTableName,
+        updatedValues,
+        where: "$_swapIdColumnName = ?",
+        whereArgs: [id],
+      );
+
+      if (count == 0) {
+        print("No habit found with id: $id");
+      } else {
+        print("Actions updated for habit with id $id.");
+      }
+    } catch (e) {
+      throw Exception("Error updating actions for habit with id $id: $e");
+    }
+  }
+
+// Add Effect
+  Future<void> addEffect({
+    required int id,
+    required bool isGood,
+    required String effect,
+  }) async {
+    try {
+      final db = await database;
+      final columnName = isGood
+          ? _swapHabitEffectsColumnName
+          : _swapAddictionEffectsColumnName;
+
+      final data = await db.query(
+        _swapTableName,
+        where: "$_swapIdColumnName = ?",
+        whereArgs: [id],
+      );
+
+      if (data.isEmpty) {
+        print("No data found for id: $id");
+        return;
+      }
+
+      final String currentEffects = data.first[columnName] as String? ?? "";
+      final updatedEffects =
+          currentEffects.isEmpty ? effect : "$currentEffects, $effect";
+
+      Map<String, Object?> updatedValues = {columnName: updatedEffects};
+
+      int count = await db.update(
+        _swapTableName,
+        updatedValues,
+        where: "$_swapIdColumnName = ?",
+        whereArgs: [id],
+      );
+
+      if (count == 0) {
+        print("No habit found with id: $id");
+      } else {
+        print("Effect added/updated for habit with id $id.");
+      }
+    } catch (e) {
+      throw Exception("Error adding effect for habit with id $id: $e");
+    }
+  }
+
+// Add Trigger
+  Future<void> addTrigger({
+    required int id,
+    required bool isGood,
+    required String trigger,
+  }) async {
+    try {
+      final db = await database;
+      final columnName = isGood
+          ? _swapHabitTriggersColumnName
+          : _swapAddictionTriggersColumnName;
+
+      final data = await db.query(
+        _swapTableName,
+        where: "$_swapIdColumnName = ?",
+        whereArgs: [id],
+      );
+
+      if (data.isEmpty) {
+        print("No data found for id: $id");
+        return;
+      }
+
+      final String currentTriggers = data.first[columnName] as String? ?? "";
+      final updatedTriggers =
+          currentTriggers.isEmpty ? trigger : "$currentTriggers, $trigger";
+
+      Map<String, Object?> updatedValues = {columnName: updatedTriggers};
+
+      int count = await db.update(
+        _swapTableName,
+        updatedValues,
+        where: "$_swapIdColumnName = ?",
+        whereArgs: [id],
+      );
+
+      if (count == 0) {
+        print("No habit found with id: $id");
+      } else {
+        print("Trigger added/updated for habit with id $id.");
+      }
+    } catch (e) {
+      throw Exception("Error adding trigger for habit with id $id: $e");
+    }
+  }
+
+// Add Action
+  Future<void> addAction({
+    required int id,
+    required bool isGood,
+    required String action,
+  }) async {
+    try {
+      final db = await database;
+      final columnName = isGood
+          ? _swapHabitActionsColumnName
+          : _swapAddictionActionsColumnName;
+
+      final data = await db.query(
+        _swapTableName,
+        where: "$_swapIdColumnName = ?",
+        whereArgs: [id],
+      );
+
+      if (data.isEmpty) {
+        print("No data found for id: $id");
+        return;
+      }
+
+      final String currentActions = data.first[columnName] as String? ?? "";
+      final updatedActions =
+          currentActions.isEmpty ? action : "$currentActions, $action";
+
+      Map<String, Object?> updatedValues = {columnName: updatedActions};
+
+      int count = await db.update(
+        _swapTableName,
+        updatedValues,
+        where: "$_swapIdColumnName = ?",
+        whereArgs: [id],
+      );
+
+      if (count == 0) {
+        print("No habit found with id: $id");
+      } else {
+        print("Action added/updated for habit with id $id.");
+      }
+    } catch (e) {
+      throw Exception("Error adding action for habit with id $id: $e");
     }
   }
 
@@ -531,5 +790,117 @@ class DatabaseService {
     } catch (e) {
       throw Exception("Error retrieving events: $e");
     }
+  }
+
+  Future<Backlog> addBacklog({
+    required String title,
+    required String description,
+    required String timeline,
+  }) async {
+    final db = await database;
+    final id = await db.insert(
+      _backlogTableName,
+      {
+        _backlogTitleColumnName: title,
+        _backlogDescriptionColumnName: description,
+        _backlogTimelineColumnName: timeline,
+      },
+    );
+    return Backlog(
+        id: id, title: title, description: description, timeScale: timeline);
+  }
+
+  Future<List<Backlog>> getAllBacklogs(String timeline) async {
+    final db = await database;
+    final rows = await db.query(
+      _backlogTableName,
+      orderBy: '$_backlogTimelineColumnName ASC',
+      where: " $_backlogTimelineColumnName = ?",
+      whereArgs: [timeline],
+    );
+    return rows.map((r) {
+      return Backlog(
+        id: r[_backlogIdColumnName] as int? ?? 0,
+        title: r[_backlogTitleColumnName] as String,
+        description: r[_backlogDescriptionColumnName] as String,
+        timeScale: r[_backlogTimelineColumnName] as String,
+      );
+    }).toList();
+  }
+
+  Future<Backlog?> getBacklogById(int id) async {
+    final db = await database;
+    final rows = await db.query(
+      _backlogTableName,
+      where: '$_backlogIdColumnName = ?',
+      whereArgs: [id],
+    );
+    if (rows.isEmpty) return null;
+    final r = rows.first;
+    return Backlog(
+      id: r[_backlogIdColumnName] as int? ?? 0,
+      title: r[_backlogTitleColumnName] as String,
+      description: r[_backlogDescriptionColumnName] as String,
+      timeScale: r[_backlogTimelineColumnName] as String,
+    );
+  }
+
+  Future<bool> updateBacklog({
+    required int id,
+    required String title,
+    required String description,
+    required String timeline,
+  }) async {
+    final db = await database;
+    final Map<String, Object?> values = {};
+
+    if (title.trim().isNotEmpty) values[_backlogTitleColumnName] = title;
+    if (description.trim().isNotEmpty)
+      values[_backlogDescriptionColumnName] = description;
+    if (timeline.trim().isNotEmpty)
+      values[_backlogTimelineColumnName] = timeline;
+
+    if (values.isEmpty) return false;
+
+    final count = await db.update(
+      _backlogTableName,
+      values,
+      where: '$_backlogIdColumnName = ?',
+      whereArgs: [id],
+    );
+    return count > 0;
+  }
+
+  Future<bool> updateBacklogDesc({
+    required int id,
+    required String description,
+  }) async {
+    final db = await database;
+    final Map<String, Object?> values = {};
+
+    if (description.isNotEmpty) {
+      values[_backlogDescriptionColumnName] = description;
+    }
+
+    if (values.isEmpty) return false;
+
+    final count = await db.update(
+      _backlogTableName,
+      values,
+      where: '$_backlogIdColumnName = ?',
+      whereArgs: [id],
+    );
+
+    return count > 0;
+  }
+
+  Future<bool> deleteBacklog(int id) async {
+    final db = await database;
+    final count = await db.delete(
+      _backlogTableName,
+      where: '$_backlogIdColumnName = ?',
+      whereArgs: [id],
+    );
+    return count > 0;
   }
 }

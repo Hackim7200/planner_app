@@ -3,14 +3,22 @@ class Habit {
   final int id;
   final String addictionTitle;
   final List<String> addictionEffects;
+  final List<String> addictionTriggers;
+  final List<String> addictionPleasures;
 
   final String habitTitle;
   final List<String> habitEffects;
+  final List<String> habitTriggers;
+  final List<String> habitPleasures;
 
   final String partOfDay, habitType;
   final int priority;
 
   Habit({
+    required this.addictionTriggers,
+    required this.addictionPleasures,
+    required this.habitTriggers,
+    required this.habitPleasures,
     required this.priority,
     required this.id,
     required this.addictionTitle,

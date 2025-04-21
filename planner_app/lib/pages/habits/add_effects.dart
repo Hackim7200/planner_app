@@ -5,14 +5,16 @@ class AddEffect extends StatefulWidget {
   final VoidCallback onAddHabit;
   final bool isGood;
   final int id;
-  final List<String> effects;
+  final List<String> currentList; // Can be effects, triggers, or actions
+  final String listType; // Can be 'effects', 'triggers', or 'actions'
 
   const AddEffect({
     Key? key,
     required this.onAddHabit,
     required this.isGood,
     required this.id,
-    required this.effects,
+    required this.currentList,
+    required this.listType,
   }) : super(key: key);
 
   @override
@@ -21,61 +23,77 @@ class AddEffect extends StatefulWidget {
 
 class _AddEffectState extends State<AddEffect> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _effectController = TextEditingController();
+  final TextEditingController _itemController = TextEditingController();
   final DatabaseService _databaseService = DatabaseService.instance;
 
   @override
   void dispose() {
-    _effectController.dispose();
+    _itemController.dispose();
     super.dispose();
   }
 
-  Future<void> _submitEffect() async {
+  // Function to handle adding effects, triggers, or actions based on listType
+  Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final String newEffect = _effectController.text.trim();
+    final String newItem = _itemController.text.trim();
 
-    // Combine the existing effects with the new effect.
-    // You can adjust this logic as needed.
-    List<String> updatedEffects = List.from(widget.effects);
-    updatedEffects.add(newEffect);
+    // Combine the existing list with the new item
+    List<String> updatedList = List.from(widget.currentList);
+    updatedList.add(newItem);
 
     try {
-      await _databaseService.updateHabitEffects(
-        id: widget.id,
-        isGood: widget.isGood,
-        effects: updatedEffects.join(", "),
-      );
+      // Call the appropriate function based on listType
+      if (widget.listType == "effects") {
+        await _databaseService.addEffect(
+          id: widget.id,
+          isGood: widget.isGood,
+          effect: updatedList.join(", "),
+        );
+      } else if (widget.listType == "triggers") {
+        await _databaseService.addTrigger(
+          id: widget.id,
+          isGood: widget.isGood,
+          trigger: updatedList.join(", "),
+        );
+      } else if (widget.listType == "actions") {
+        await _databaseService.addAction(
+          id: widget.id,
+          isGood: widget.isGood,
+          action: updatedList.join(", "),
+        );
+      }
 
       // Trigger callback to update the UI outside this widget if needed.
       widget.onAddHabit();
 
       // Close the dialog and clear the text field.
       Navigator.of(context).pop();
-      _effectController.clear();
+      _itemController.clear();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error adding effect: $e')),
+        SnackBar(content: Text('Error adding ${widget.listType}: $e')),
       );
     }
   }
 
+  // Opens the dialog for input
   void _openDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Add Effect'),
+          title: Text('Add ${widget.listType.capitalize()}'),
           content: Form(
             key: _formKey,
             child: TextFormField(
-              controller: _effectController,
-              decoration: const InputDecoration(
-                labelText: 'Effect',
+              controller: _itemController,
+              decoration: InputDecoration(
+                labelText: 'Enter ${widget.listType}',
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Please enter an effect';
+                  return 'Please enter a ${widget.listType}';
                 }
                 return null;
               },
@@ -83,7 +101,7 @@ class _AddEffectState extends State<AddEffect> {
           ),
           actions: [
             ElevatedButton(
-              onPressed: _submitEffect,
+              onPressed: _submit,
               child: const Text('Save'),
             ),
           ],
@@ -99,5 +117,11 @@ class _AddEffectState extends State<AddEffect> {
       icon: const Icon(Icons.add),
       onPressed: _openDialog,
     );
+  }
+}
+
+extension StringCasingExtension on String {
+  String capitalize() {
+    return this.isEmpty ? this : this[0].toUpperCase() + this.substring(1);
   }
 }

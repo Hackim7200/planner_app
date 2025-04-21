@@ -8,6 +8,7 @@ class ListOfTodo extends StatefulWidget {
   final bool isActive;
   final String timeLabel;
   final bool isToday;
+  final int hoursInSection;
 
   const ListOfTodo({
     super.key,
@@ -15,6 +16,7 @@ class ListOfTodo extends StatefulWidget {
     required this.isActive,
     required this.timeLabel,
     required this.isToday,
+    required this.hoursInSection,
   });
 
   @override
@@ -54,6 +56,10 @@ class _ListOfTodoState extends State<ListOfTodo> {
                       style: Theme.of(context).textTheme.titleMedium),
                   Text(widget.timeLabel,
                       style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    '${(widget.hoursInSection / 60).floor()}h ${(widget.hoursInSection % 60)}m',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   AddTodo(
                     sectionOfDay: widget.sectionOfDay,
                     onAddTask: () {

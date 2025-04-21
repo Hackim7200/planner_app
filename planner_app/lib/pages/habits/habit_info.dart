@@ -21,42 +21,34 @@ class HabitInfo extends StatefulWidget {
 class _HabitInfoState extends State<HabitInfo> {
   final DatabaseService _databaseService = DatabaseService.instance;
 
-  // Initialize currentEffects as an empty list.
+  // Initialize currentEffects, currentTriggers, currentActions, and currentPleasures as empty lists.
   List<String> currentEffects = [];
+  List<String> currentTriggers = [];
+  List<String> currentActions = [];
+  List<String> currentPleasures = [];
 
   @override
   void initState() {
     super.initState();
-    _loadCurrentEffects();
+    _loadCurrentData();
   }
 
-  /// Loads the current habit effects from the database asynchronously
-  Future<void> _loadCurrentEffects() async {
+  /// Loads the current data (effects, triggers, actions, pleasures) from the database asynchronously
+  Future<void> _loadCurrentData() async {
     try {
-      final effects = await _databaseService.getHabitEffects(
-          widget.habit.id, widget.isGood);
-      setState(() {
-        currentEffects = effects;
-      });
+      currentEffects =
+          await _databaseService.getEffects(widget.habit.id, widget.isGood);
+      currentTriggers =
+          await _databaseService.getTriggers(widget.habit.id, widget.isGood);
+      currentActions =
+          await _databaseService.getActions(widget.habit.id, widget.isGood);
+      currentPleasures = await _databaseService.getEffects(widget.habit.id,
+          widget.isGood); // Using effects for pleasures (adjust accordingly)
+
+      setState(() {});
     } catch (e) {
-      print("Error loading habit effects: $e");
+      print("Error loading habit data: $e");
     }
-  }
-
-  /// Updates the habit effects in the database using the values from currentEffects.
-  Future<void> updateHabitEffects() async {
-    setState(() {
-      // For example purposes, add a fixed string to currentEffects.
-      currentEffects.add("item added to list");
-    });
-    await _databaseService.updateHabitEffects(
-      id: widget.habit.id,
-      effects: currentEffects.join(", "),
-      isGood: widget.isGood,
-    );
-
-    // Optionally, you could refresh the local list from the database:
-    // await _loadCurrentEffects();
   }
 
   @override
@@ -103,12 +95,13 @@ class _HabitInfoState extends State<HabitInfo> {
               ),
             ),
             const SizedBox(height: 16.0),
-            // Effects (Benefits or Side Effects) Section
+
+            // Trigger Section
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  widget.isGood ? "Benefits of Habit" : "Harms of Habit",
+                  "Effect",
                   style: textTheme.titleLarge,
                 ),
                 AddEffect(
@@ -117,7 +110,8 @@ class _HabitInfoState extends State<HabitInfo> {
                   },
                   isGood: widget.isGood,
                   id: widget.habit.id,
-                  effects: currentEffects,
+                  currentList: currentTriggers,
+                  listType: 'effect', // Set the correct list type
                 )
               ],
             ),
@@ -129,36 +123,167 @@ class _HabitInfoState extends State<HabitInfo> {
               ),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: FutureBuilder<List<String>>(
-                  future: _databaseService.getHabitEffects(
-                      widget.habit.id, widget.isGood),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    } else if (snapshot.hasError) {
-                      return Center(child: Text("Error: ${snapshot.error}"));
-                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Center(child: Text("No effects available."));
-                    } else {
-                      return ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: snapshot.data!.length,
-                        itemBuilder: (context, index) {
-                          String effect = snapshot.data![index];
-                          return ListTile(
-                            leading: Icon(
-                              widget.isGood
-                                  ? FontAwesomeIcons.circleCheck
-                                  : FontAwesomeIcons.circleXmark,
-                            ),
-                            title: Text(effect),
-                            contentPadding: EdgeInsets.zero,
-                            dense: true,
-                          );
-                        },
-                      );
-                    }
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: currentTriggers.length,
+                  itemBuilder: (context, index) {
+                    String trigger = currentTriggers[index];
+                    return ListTile(
+                      leading: Icon(
+                        widget.isGood
+                            ? FontAwesomeIcons.circleCheck
+                            : FontAwesomeIcons.circleXmark,
+                      ),
+                      title: Text(trigger),
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                    );
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(height: 16.0),
+            // Action Sec
+            // Trigger Section
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Trigger",
+                  style: textTheme.titleLarge,
+                ),
+                AddEffect(
+                  onAddHabit: () {
+                    setState(() {});
+                  },
+                  isGood: widget.isGood,
+                  id: widget.habit.id,
+                  currentList: currentTriggers,
+                  listType: 'triggers', // Set the correct list type
+                )
+              ],
+            ),
+            const SizedBox(height: 8.0),
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: currentTriggers.length,
+                  itemBuilder: (context, index) {
+                    String trigger = currentTriggers[index];
+                    return ListTile(
+                      leading: Icon(
+                        widget.isGood
+                            ? FontAwesomeIcons.circleCheck
+                            : FontAwesomeIcons.circleXmark,
+                      ),
+                      title: Text(trigger),
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                    );
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(height: 16.0),
+            // Action Section
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Action",
+                  style: textTheme.titleLarge,
+                ),
+                AddEffect(
+                  onAddHabit: () {
+                    setState(() {});
+                  },
+                  isGood: widget.isGood,
+                  id: widget.habit.id,
+                  currentList: currentActions,
+                  listType: 'actions', // Set the correct list type
+                )
+              ],
+            ),
+            const SizedBox(height: 8.0),
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: currentActions.length,
+                  itemBuilder: (context, index) {
+                    String action = currentActions[index];
+                    return ListTile(
+                      leading: Icon(
+                        widget.isGood
+                            ? FontAwesomeIcons.circleCheck
+                            : FontAwesomeIcons.circleXmark,
+                      ),
+                      title: Text(action),
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                    );
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(height: 16.0),
+            // Pleasure Section
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Pleasure",
+                  style: textTheme.titleLarge,
+                ),
+                AddEffect(
+                  onAddHabit: () {
+                    setState(() {});
+                  },
+                  isGood: widget.isGood,
+                  id: widget.habit.id,
+                  currentList: currentPleasures,
+                  listType: 'effects', // Assuming 'effects' for pleasures
+                )
+              ],
+            ),
+            const SizedBox(height: 8.0),
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: currentPleasures.length,
+                  itemBuilder: (context, index) {
+                    String pleasure = currentPleasures[index];
+                    return ListTile(
+                      leading: Icon(
+                        widget.isGood
+                            ? FontAwesomeIcons.circleCheck
+                            : FontAwesomeIcons.circleXmark,
+                      ),
+                      title: Text(pleasure),
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                    );
                   },
                 ),
               ),

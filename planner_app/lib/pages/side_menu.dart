@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:planner_app/pages/backlog/backlog.dart';
+import 'package:planner_app/pages/backlog/backlog_page.dart';
 import 'package:planner_app/pages/habits/habit_page.dart';
 
 import 'package:planner_app/pages/how_to.dart';
+import 'package:planner_app/pages/routine/routine.dart';
 
 class SideMenu extends StatelessWidget {
   const SideMenu({super.key});
@@ -53,7 +54,7 @@ class SideMenu extends StatelessWidget {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => HabitPage(),
+                    builder: (context) => Routine(),
                   ));
               // Update the state of the app.
               // ...
@@ -66,7 +67,7 @@ class SideMenu extends StatelessWidget {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => Backlog(),
+                    builder: (context) => BacklogPage(),
                   ));
               // Update the state of the app.
               // ...
