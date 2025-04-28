@@ -559,7 +559,12 @@ class DatabaseService {
     }
   }
 
-  Future<List<Task>> getTasksForTime(String time, bool isToday) async {
+  Future<List<Task>> getTasksForTime(String sectionOfDay, bool isToday) async {
+    //how this function works
+    // gets current day if the param is today than collects task with current date but if its tommorow it adds a day and collects the tasks for tommorow
+
+
+
     try {
       // Only use the date part (yyyy-MM-dd)
       String date = DateTime.now().toIso8601String().split('T')[0];
@@ -575,7 +580,7 @@ class DatabaseService {
         _tasksTableName,
         where:
             "$_taskPartOfDayColumnName = ? AND date($_taskDueDateColumnName) = ?",
-        whereArgs: [time, date],
+        whereArgs: [sectionOfDay, date],
         orderBy: "$_taskOrderColumnName ASC", // explicitly specify order
       );
 

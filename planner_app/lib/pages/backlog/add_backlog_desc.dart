@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:planner_app/database/database_service.dart';
 
@@ -27,10 +28,14 @@ class _AddBacklogDescState extends State<AddBacklogDesc> {
   @override
   void initState() {
     super.initState();
-    // Initialize the description controller and items list
-    items = widget.description.split(", ");
-    descriptionController.text =
-        widget.description; // Pre-fill the controller with current description
+    try {
+      items = jsonDecode(widget.description).cast<String>();  // Ensure correct type.
+    } catch (e) {
+      items = [];  // In case the description is not valid JSON.
+    }
+
+    // Optionally pre-fill the controller with the current description
+    // descriptionController.text = widget.description;
   }
 
   @override
@@ -40,13 +45,17 @@ class _AddBacklogDescState extends State<AddBacklogDesc> {
   }
 
   void _submitAndResetAllVariables() async {
+    if (descriptionController.text.trim().isEmpty) return;  // Don't add empty descriptions.
+
     // Add new item from the text field into the list
-    items.add(descriptionController.text);
+    items.add(descriptionController.text.trim());
+
+    String serializedList = jsonEncode(items);
 
     // Update the description in the database
     await _databaseService.updateBacklogDesc(
       id: widget.id,
-      description: items.join(", "), // Join the list into a string
+      description: serializedList, // Join the list into a string
     );
 
     if (mounted) {
@@ -74,24 +83,25 @@ class _AddBacklogDescState extends State<AddBacklogDesc> {
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ),
-                  content: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        TextFormField(
-                          controller: descriptionController,
-                          decoration:
-                              const InputDecoration(labelText: 'Description'),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Please enter a description';
-                            }
-                            return null;
-                          },
-                        ),
-                      ],
+                  content: SingleChildScrollView(  // To prevent overflow on smaller screens
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TextFormField(
+                            controller: descriptionController,
+                            decoration: const InputDecoration(labelText: 'Description'),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Please enter a description';
+                              }
+                              return null;
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   actions: [

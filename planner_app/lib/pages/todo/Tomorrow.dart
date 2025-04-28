@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:planner_app/pages/components/list_of_todo.dart';
+import 'package:planner_app/pages/todo/component/list_of_todo.dart';
 
 class Tomorrow extends StatelessWidget {
   final Map<String, String> prayerTimes;

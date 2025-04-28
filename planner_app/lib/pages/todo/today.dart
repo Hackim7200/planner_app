@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:planner_app/pages/components/list_of_todo.dart';
+import 'package:planner_app/pages/todo/component/list_of_todo.dart';
 
 class Today extends StatelessWidget {
   final Map<String, String> prayerTimes; // Pass prayer times as a parameter
@@ -19,13 +19,6 @@ class Today extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Define the list of time labels
-    List<String> timeLabels = [
-      "Fajr",
-      "Dhuhr",
-      "Asr",
-      "Maghrib",
-      "Isha",
-    ];
 
     // Create a list to store the todos
     List<Widget> listOfTodos = [];

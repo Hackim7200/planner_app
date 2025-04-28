@@ -1,7 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:planner_app/database/backlog.dart';
 import 'package:planner_app/database/database_service.dart';
-import 'package:planner_app/pages/backlog/add_backlog.dart';
 import 'package:planner_app/pages/backlog/add_backlog_desc.dart';
 
 class BacklogItemInfo extends StatefulWidget {
@@ -19,7 +20,6 @@ class BacklogItemInfo extends StatefulWidget {
 }
 
 class _BacklogItemInfoState extends State<BacklogItemInfo> {
-
   // Fetch backlog data by id
   Future<Backlog> getBacklogById() async {
     DatabaseService db = DatabaseService.instance;
@@ -38,7 +38,7 @@ class _BacklogItemInfoState extends State<BacklogItemInfo> {
         title: Text(widget.title),
         actions: [
           FutureBuilder<Backlog>(
-            future: getBacklogById(),  // Fetch the backlog asynchronously
+            future: getBacklogById(), // Fetch the backlog asynchronously
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Center(child: CircularProgressIndicator());
@@ -61,23 +61,39 @@ class _BacklogItemInfoState extends State<BacklogItemInfo> {
         ],
       ),
       body: FutureBuilder<Backlog>(
-        future: getBacklogById(),  // Fetch the backlog asynchronously
+        future: getBacklogById(), // Fetch the backlog asynchronously
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator()); // Show loading indicator while waiting
+            return Center(
+                child:
+                    CircularProgressIndicator()); // Show loading indicator while waiting
           } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}')); // Show error if something goes wrong
+            return Center(
+                child: Text(
+                    'Error: ${snapshot.error}')); // Show error if something goes wrong
           } else if (!snapshot.hasData) {
-            return Center(child: Text('No backlog item found!')); // Handle the case if no backlog data is found
+            return Center(
+                child: Text(
+                    'No backlog item found!')); // Handle the case if no backlog data is found
           } else {
             final backlog = snapshot.data!;
-            List<String> descriptionItems = backlog.description.split(", "); // Split description into list items
+
+            List<String> descriptionItems; // Split description into list items
+
+            try {
+              descriptionItems = jsonDecode(backlog.description)
+                  .cast<String>(); // Ensure correct type.
+            } catch (e) {
+              descriptionItems =
+                  []; // In case the description is not valid JSON.
+            }
 
             return ListView.builder(
               itemCount: descriptionItems.length,
               itemBuilder: (context, index) {
                 return ListTile(
-                  title: Text(descriptionItems[index]), // Display each item in a ListTile
+                  title: Text(descriptionItems[
+                      index]), // Display each item in a ListTile
                 );
               },
             );
@@ -87,4 +103,3 @@ class _BacklogItemInfoState extends State<BacklogItemInfo> {
     );
   }
 }
-
