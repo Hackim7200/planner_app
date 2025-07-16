@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:planner_app/pages/side_menu.dart';
 import 'package:planner_app/pages/event/add_event.dart';
 import 'package:planner_app/pages/event/past_evemts.dart';
 import 'package:planner_app/pages/event/future_events.dart';
@@ -50,7 +49,6 @@ class _EventPageState extends State<EventPage> {
           }),
         ],
       ),
-      drawer: SideMenu(),
 
       body: _pages[_selectedIndexBottomNav],
       // floatingActionButton: FloatingActionButton(onPressed: () {}),

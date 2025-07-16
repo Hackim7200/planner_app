@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:planner_app/pages/event/event_page.dart';
-import 'package:planner_app/pages/todo/add_todo.dart';
 
 class CustomTopBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomTopBar({super.key});

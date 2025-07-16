@@ -860,10 +860,12 @@ class DatabaseService {
     final Map<String, Object?> values = {};
 
     if (title.trim().isNotEmpty) values[_backlogTitleColumnName] = title;
-    if (description.trim().isNotEmpty)
+    if (description.trim().isNotEmpty) {
       values[_backlogDescriptionColumnName] = description;
-    if (timeline.trim().isNotEmpty)
+    }
+    if (timeline.trim().isNotEmpty) {
       values[_backlogTimelineColumnName] = timeline;
+    }
 
     if (values.isEmpty) return false;
 
